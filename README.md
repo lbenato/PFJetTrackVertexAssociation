@@ -8,5 +8,5 @@ cmsenv
 git cms-init
 
 #clone repo
-git clone
+git clone https://github.com/lbenato/PFJetTrackVertexAssociation.git
 ```
