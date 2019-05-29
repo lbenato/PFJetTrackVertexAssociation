@@ -9,4 +9,6 @@ git cms-init
 
 #clone repo
 git clone https://github.com/lbenato/PFJetTrackVertexAssociation.git
+cd PFJetTrackVertexAssociation
+scram b -j 32
 ```
