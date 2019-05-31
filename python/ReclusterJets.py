@@ -9,12 +9,12 @@ process = cms.Process("USER")
 task = cms.Task()
 
 ## Events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 ## Messagge logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 20
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 ## Input files
 process.source = cms.Source("PoolSource",
@@ -22,7 +22,7 @@ process.source = cms.Source("PoolSource",
         #MINIAOD
         '/store/mc/RunIIFall17MiniAODv2/QCD_Pt_80to120_TuneCP5_13TeV_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/FEDB9DFE-2542-E811-B39F-0CC47A745284.root',
         #AOD
-        #'/store/mc/RunIIFall17DRPremix/QCD_Pt_80to120_TuneCP5_13TeV_pythia8/AODSIM/94X_mc2017_realistic_v10-v1/60000/D6EB5001-36DB-E711-9843-0025905A60F2.root',
+        #'/store/mc/RunIIFall17DRPremix/QCD_Pt_80to120_TuneCP5_13TeV_pythia8/AODSIM/PU2017_94X_mc2017_realistic_v11_ext1-v2/710000/FE472D58-AE73-E811-90E3-24BE05CE1E51.root'
     )
 )
 
@@ -251,9 +251,21 @@ process.TFileService = cms.Service( "TFileService",
 
 
 
-process.jet = cms.EDAnalyzer('Jet',
+process.ntuple = cms.EDAnalyzer('Ntuplizer',
+  #jetSet = cms.PSet(
+  #  jets = cms.InputTag('selectedPatJets'),
+  #  met = cms.InputTag('slimmedMETs'),
+  #  jetid = cms.int32(0),
+  #  jet1pt = cms.double(15.),
+  #  jet2pt = cms.double(15.),
+  #  jeteta = cms.double(5.2),
+  #  vertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
+  #  rho = cms.InputTag('fixedGridRhoFastjetAll'),
+  #),
   jets = cms.InputTag('selectedPatJets'),
+  jetpt = cms.double(15.),
   pileup = cms.InputTag('slimmedAddPileupInfo'),
+  vertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
   jets1 = cms.InputTag('selectedPatJetsNew1CHS'),
   jets2 = cms.InputTag('selectedPatJetsNew2CHS'),
   jets3 = cms.InputTag('selectedPatJetsNew3CHS'),
@@ -292,7 +304,7 @@ process.seq = cms.Sequence(
     process.selectedPatJetsNew3CHS *
     process.selectedPatJetsNew4CHS *
     #analyzer
-    process.jet
+    process.ntuple
 )
 
 
@@ -318,7 +330,7 @@ process.OUT = cms.OutputModule("PoolOutputModule",
 process.endpath= cms.EndPath(process.OUT)
 '''
 
-open('pydump.py','w').write(process.dumpPython())
+open('dump_ReclusterJets.py','w').write(process.dumpPython())
 
 process.p.associate(task)
 process.p.associate(process.patAlgosToolsTask)
