@@ -95,7 +95,7 @@ void ObjectsFormat::ResetJetType(JetType& I) {
     I.phiGenJ     = -4.;
     I.massGenJ    = -10.;
     I.dRGenJ      = 999.;
-    I.response    = 999.;
+    I.response    = -1.;
     I.ptGen       = -10.;
     I.etaGen      = -4.;
     I.phiGen      = -4.;
