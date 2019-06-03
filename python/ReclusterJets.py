@@ -9,12 +9,12 @@ process = cms.Process("USER")
 task = cms.Task()
 
 ## Events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
-#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
+#process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 ## Messagge logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 50
 
 ## Input files
 process.source = cms.Source("PoolSource",

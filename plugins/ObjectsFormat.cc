@@ -13,6 +13,7 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     I.phi         = R->phi();
     I.mass        = R->mass();
     I.energy      = R->energy();
+    I.hasGenJ     = R->genJet() ? true : false;
     if(isMC && R->genJet()) {
       I.ptGenJ    = R->genJet()->pt();
       I.etaGenJ   = R->genJet()->eta();
@@ -20,6 +21,15 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
       I.massGenJ  = R->genJet()->mass();
       I.dRGenJ    = reco::deltaR(R->eta(),R->phi(),R->genJet()->eta(),R->genJet()->phi());//!!
       I.response  = (reco::deltaR(R->eta(),R->phi(),R->genJet()->eta(),R->genJet()->phi()) < 0.4 && R->genJet()->pt()>0.) ? R->pt()/R->genJet()->pt() : -1.;//!!
+      I.multiGen  = R->hasUserFloat("multiGen") ? R->userFloat("multiGen") : -1.;
+      I.nMultiGen = R->hasUserFloat("nMultiGen") ? R->userFloat("nMultiGen") : -1.;
+      I.cMultiGen = R->hasUserFloat("cMultiGen") ? R->userFloat("cMultiGen") : -1.;
+      I.cHadEGen  = R->hasUserFloat("cHadEGen") ? R->userFloat("cHadEGen") : -1.;
+      I.nHadEGen  = R->hasUserFloat("nHadEGen") ? R->userFloat("nHadEGen") : -1.;
+      I.emEGen    = R->hasUserFloat("emEGen") ? R->userFloat("emEGen") : -1.;
+      I.eleEGen   = R->hasUserFloat("eleEGen") ? R->userFloat("eleEGen") : -1.;
+      I.photonEGen= R->hasUserFloat("photonEGen") ? R->userFloat("photonEGen") : -1.;
+
     }
     if(isMC && R->genParton()) {
       I.ptGen     = R->genParton()->pt();
@@ -54,6 +64,9 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     I.partonFlavour     = R->partonFlavour();
     I.hadronFlavour     = R->hadronFlavour();
     I.mother = 0;
+    I.GenRecoMulti      = (R->genJet() && R->hasUserFloat("multiGen") && R->userFloat("multiGen")>0) ? (R->chargedMultiplicity() + R->neutralMultiplicity())/R->userFloat("multiGen")  : -1.;
+    I.GenRecoChMulti    =(R->genJet() && R->hasUserFloat("cMultiGen") && R->userFloat("cMultiGen")>0) ? (R->chargedMultiplicity())/R->userFloat("cMultiGen")  : -1.;
+    I.GenRecoNeuMulti   =(R->genJet() && R->hasUserFloat("nMultiGen") && R->userFloat("nMultiGen")>0) ? (R->neutralMultiplicity())/R->userFloat("nMultiGen")  : -1.;
     //if(isMC && R->genParton()) I.mother = Utilities::FindMotherId(R->genParton());
     I.isLoose     = R->hasUserInt("isLoose") ? R->userInt("isLoose") : false;
     I.isMedium    = false;
@@ -90,12 +103,21 @@ void ObjectsFormat::ResetJetType(JetType& I) {
     I.npr           = -1.;
     I.cMulti        = -1.;
     I.nMulti        = -1.;
+    I.hasGenJ       =false;
     I.ptGenJ      = -10.;
     I.etaGenJ     = -4.;
     I.phiGenJ     = -4.;
     I.massGenJ    = -10.;
     I.dRGenJ      = 999.;
     I.response    = -1.;
+    I.multiGen    = -1.;
+    I.nMultiGen   = -1.;
+    I.cMultiGen   = -1.;
+    I.cHadEGen    = -1.;
+    I.nHadEGen    = -1.;
+    I.emEGen      = -1.;
+    I.eleEGen     = -1.;
+    I.photonEGen  = -1.;
     I.ptGen       = -10.;
     I.etaGen      = -4.;
     I.phiGen      = -4.;
@@ -103,11 +125,14 @@ void ObjectsFormat::ResetJetType(JetType& I) {
     I.pdgIdGen     = 0.;
     I.partonFlavour     = 0;
     I.hadronFlavour     = 0;
-    I.mother      = false;
+    I.mother            = false;
+    I.GenRecoMulti      = -1.;
+    I.GenRecoChMulti    = -1.;
+    I.GenRecoNeuMulti   = -1.;
     I.isLoose     = false;
     I.isMedium    = false;
     I.isTight     = false;
     I.isTightLepVeto     = false;
 }
 
-std::string ObjectsFormat::ListJetType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:cHadE/F:nHadE/F:cHadEFrac/F:nHadEFrac/F:nEmE/F:nEmEFrac/F:cEmE/F:cEmEFrac/F:cmuE/F:cmuEFrac/F:muE/F:muEFrac/F:eleE/F:eleEFrac/F:eleMulti/F:photonE/F:photonEFrac/F:photonMulti/F:cHadMulti/F:nHadMulti/F:npr/F:cMulti/F:nMulti/F:ptGenJ/F:etaGenJ/F:phiGenJ/F:massGenJ/F:dRGenJ/F:response/F:ptGen/F:etaGen/F:phiGen/F:massGen/F:pdgIdGen/I:partonFlavour/I:hadronFlavour/I:mother/I:isLoose/O:isMedium/O:isTight/O:isTightLepVeto/O";}
+std::string ObjectsFormat::ListJetType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:cHadE/F:nHadE/F:cHadEFrac/F:nHadEFrac/F:nEmE/F:nEmEFrac/F:cEmE/F:cEmEFrac/F:cmuE/F:cmuEFrac/F:muE/F:muEFrac/F:eleE/F:eleEFrac/F:eleMulti/F:photonE/F:photonEFrac/F:photonMulti/F:cHadMulti/F:nHadMulti/F:npr/F:cMulti/F:nMulti/F:hasGenJ/O:ptGenJ/F:etaGenJ/F:phiGenJ/F:massGenJ/F:dRGenJ/F:response/F:multiGen/F:nMultiGen/F:cMultiGen/F:cHadEGen/F:nHadEGen/F:emEGen/F:eleEGen/F:photonEGen/F:ptGen/F:etaGen/F:phiGen/F:massGen/F:pdgIdGen/I:partonFlavour/I:hadronFlavour/I:mother/I:GenRecoMulti/F:GenRecoChMulti/F:GenRecoNeuMulti/F:isLoose/O:isMedium/O:isTight/O:isTightLepVeto/O";}

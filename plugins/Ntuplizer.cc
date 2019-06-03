@@ -82,6 +82,9 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
    public:
       explicit Ntuplizer(const edm::ParameterSet&);
       ~Ntuplizer();
+      virtual void GenJetAnalyzer(std::vector<pat::Jet>&);
+      virtual bool isLooseJet(pat::Jet&);
+      virtual bool isTightJet(pat::Jet&);
 
   // static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
@@ -255,8 +258,8 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
     //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
     //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
-    //jet.addUserInt("isLoose", theJetAnalyzer->isLooseJet(jet) ? 1 : 0);
-    //jet.addUserInt("isTight", theJetAnalyzer->isTightJet(jet) ? 1 : 0);
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
     //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
     jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
     jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
@@ -266,11 +269,63 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     jet.addUserFloat("muEFrac", jet.muonEnergyFraction());
     jet.addUserFloat("eleEFrac", jet.electronEnergyFraction());
     jet.addUserFloat("photonEFrac", jet.photonEnergyFraction());
+
+    /*
+    if(jet.genJet()){
+      std::vector<edm::Ptr<reco::Candidate>> GenJetConstituentVect = jet.genJet()->getJetConstituents();
+      std::cout << "Gen jet.... " << std::endl;
+      std::cout << "had energy: " << jet.genJet()->hadEnergy() << std::endl;
+      std::cout << "invisible energy: " << jet.genJet()->invisibleEnergy() << std::endl;
+      std::cout << "em energy: " << jet.genJet()->emEnergy() << std::endl;
+
+      float emEnergy = 0;
+      float eleEnergy = 0;
+      float photonEnergy = 0;
+      float muEnergy = 0;
+      float cHadEnergy = 0;
+      float nHadEnergy = 0;
+      int chargedMulti = 0;
+      int neutralMulti = 0;
+      for(unsigned int k = 0; k < GenJetConstituentVect.size(); k++){
+	std::cout << "Jet const n. " << k << std::endl;
+	std::cout << "pdgId: " << GenJetConstituentVect[k]->pdgId() << std::endl;
+	std::cout << "energy: " << GenJetConstituentVect[k]->energy() << std::endl;
+	std::cout << "charge: " << GenJetConstituentVect[k]->charge() << std::endl;
+	if(abs(GenJetConstituentVect[k]->pdgId())==22) photonEnergy += GenJetConstituentVect[k]->energy();
+	if(abs(GenJetConstituentVect[k]->pdgId())==11) eleEnergy += GenJetConstituentVect[k]->energy();
+	if(abs(GenJetConstituentVect[k]->pdgId())==13) muEnergy += GenJetConstituentVect[k]->energy();
+	if(abs(GenJetConstituentVect[k]->pdgId())>22 && GenJetConstituentVect[k]->charge()==0) nHadEnergy += GenJetConstituentVect[k]->energy();
+	if(abs(GenJetConstituentVect[k]->pdgId())>22 && GenJetConstituentVect[k]->charge()!=0) cHadEnergy += GenJetConstituentVect[k]->energy();
+	if(GenJetConstituentVect[k]->charge()==0) neutralMulti++;
+	if(GenJetConstituentVect[k]->charge()!=0) chargedMulti++;
+      //Methods like isMuon, isElectron, isPhoton do not work. Always getting 0.
+      }
+      std::cout << "from constituents - ele energy: " << eleEnergy << std::endl;
+      std::cout << "from constituents - photon energy: " << photonEnergy << std::endl;
+      std::cout << "from constituents - nHad energy: " << nHadEnergy << std::endl;
+      std::cout << "from constituents - cHad energy: " << cHadEnergy << std::endl;
+      std::cout << "from constituents - total Had energy: " << nHadEnergy+cHadEnergy << std::endl;
+      std::cout << "from constituents - EM energy: " << eleEnergy+photonEnergy << std::endl;
+
+      jet.addUserFloat("cHadEGen", cHadEnergy);
+      jet.addUserFloat("nHadEGen", nHadEnergy);
+
+      jet.addUserFloat("nMultiGen", float(neutralMulti));
+      jet.addUserFloat("cMultiGen", float(chargedMulti));
+
+      jet.addUserFloat("emEGen", eleEnergy+photonEnergy);
+      jet.addUserFloat("eleEGen", eleEnergy);
+      jet.addUserFloat("photonEGen", photonEnergy);
+      
+    }
+    */
+
     JetsVect.push_back(jet);
   }
   nJets = JetsVect.size();
   Jets.clear();
 
+  Ntuplizer::GenJetAnalyzer(JetsVect);
 
   ////**********////
   //// JetsNew1 ////
@@ -287,8 +342,8 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
     //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
     //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
-    //jet.addUserInt("isLoose", theJetAnalyzer->isLooseJet(jet) ? 1 : 0);
-    //jet.addUserInt("isTight", theJetAnalyzer->isTightJet(jet) ? 1 : 0);
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
     //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
     jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
     jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
@@ -302,6 +357,8 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   nJetsNew1 = JetsVectNew1.size();
   JetsNew1.clear();
+
+  Ntuplizer::GenJetAnalyzer(JetsVectNew1);
 
   ////**********////
   //// JetsNew2 ////
@@ -318,8 +375,8 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
     //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
     //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
-    //jet.addUserInt("isLoose", theJetAnalyzer->isLooseJet(jet) ? 1 : 0);
-    //jet.addUserInt("isTight", theJetAnalyzer->isTightJet(jet) ? 1 : 0);
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
     //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
     jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
     jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
@@ -334,6 +391,7 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   nJetsNew2 = JetsVectNew2.size();
   JetsNew2.clear();
 
+  Ntuplizer::GenJetAnalyzer(JetsVectNew2);
 
   ////**********////
   //// JetsNew3 ////
@@ -350,8 +408,8 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
     //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
     //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
-    //jet.addUserInt("isLoose", theJetAnalyzer->isLooseJet(jet) ? 1 : 0);
-    //jet.addUserInt("isTight", theJetAnalyzer->isTightJet(jet) ? 1 : 0);
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
     //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
     jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
     jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
@@ -365,6 +423,9 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   nJetsNew3 = JetsVectNew3.size();
   JetsNew3.clear();
+
+  Ntuplizer::GenJetAnalyzer(JetsVectNew3);
+
 
   ////**********////
   //// JetsNew4 ////
@@ -381,8 +442,8 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
     //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
     //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
-    //jet.addUserInt("isLoose", theJetAnalyzer->isLooseJet(jet) ? 1 : 0);
-    //jet.addUserInt("isTight", theJetAnalyzer->isTightJet(jet) ? 1 : 0);
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
     //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
     jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
     jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
@@ -393,9 +454,12 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     jet.addUserFloat("eleEFrac", jet.electronEnergyFraction());
     jet.addUserFloat("photonEFrac", jet.photonEnergyFraction());
     JetsVectNew4.push_back(jet);
+
   }
   nJetsNew4 = JetsVectNew4.size();
   JetsNew4.clear();
+
+  Ntuplizer::GenJetAnalyzer(JetsVectNew4);
 
 
 
@@ -413,9 +477,6 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   nGenJets = GenJetsVect.size();
   //Jets.clear();
 
-
-
-  
 
   if(isVerbose) {
     std::cout << " --- Event n. " << iEvent.id().event() << ", lumi " << iEvent.luminosityBlock() << ", run " << iEvent.id().run() << std::endl;
@@ -468,51 +529,11 @@ Ntuplizer::beginJob()
   tree=fs->make<TTree>("tree","tree");
   tree->Branch("isMC" , &isMC, "isMC/O");
   tree->Branch("nJets",&nJets,"nJets/I");
-  //tree->Branch("ptPF",ptPF,"ptPF[nJets]/F");
-  //tree->Branch("etaPF",etaPF,"etaPF[nJets]/F");
-  //tree->Branch("phiPF",phiPF,"phiPF[nJets]/F");
-  //tree->Branch("jecPF",jecPF,"jecPF[nJets]/F");
   tree->Branch("nJetsNew1",&nJetsNew1,"nJetsNew1/I");
   tree->Branch("nJetsNew2",&nJetsNew2,"nJetsNew2/I");
   tree->Branch("nJetsNew3",&nJetsNew3,"nJetsNew3/I");
   tree->Branch("nJetsNew4",&nJetsNew4,"nJetsNew4/I");
- 
-  //tree->Branch("ptCHS1",ptCHS1,"ptCHS1[nJetsNew1]/F");
-  //tree->Branch("etaCHS1",etaCHS1,"etaCHS1[nJetsNew1]/F");
-  //tree->Branch("phiCHS1",phiCHS1,"phiCHS1[nJetsNew1]/F");
-  
-  //tree->Branch("ptCHS2",ptCHS2,"ptCHS2[nJetsNew2]/F");
-  //tree->Branch("etaCHS2",etaCHS2,"etaCHS2[nJetsNew2]/F");
-  //tree->Branch("phiCHS2",phiCHS2,"phiCHS2[nJetsNew2]/F");
-  
-  //tree->Branch("ptCHS3",ptCHS3,"ptCHS3[nJetsNew3]/F");
-  //tree->Branch("etaCHS3",etaCHS3,"etaCHS3[nJetsNew3]/F");
-  //tree->Branch("phiCHS3",phiCHS3,"phiCHS3[nJetsNew3]/F");
-  
-  //tree->Branch("ptCHS4",ptCHS4,"ptCHS4[nJetsNew4]/F");
-  //tree->Branch("etaCHS4",etaCHS4,"etaCHS4[nJetsNew4]/F");
-  //tree->Branch("phiCHS4",phiCHS4,"phiCHS4[nJetsNew4]/F");
-
- 
   tree->Branch("nGenJets",&nGenJets,"nGenJets/I");
-  //tree->Branch("ptGen",ptGen,"ptGen[nGenJets]/F");
-  //tree->Branch("ptGen",ptGen,"ptGen[nGenJets]/F");
-  //tree->Branch("etaGen",etaGen,"etaGen[nGenJets]/F");
-  //tree->Branch("phiGen",phiGen,"phiGen[nGenJets]/F");
-  //tree->Branch("ptPFGen",ptPFGen,"ptPFGen[nGenJets]/F");
-  //tree->Branch("jecPFGen",jecPFGen,"jecPFGen[nGenJets]/F");
-  //tree->Branch("drPFGen",drPFGen,"drPFGen[nGenJets]/F");
-  //tree->Branch("ptGenCHS3",ptGenCHS3,"ptGenCHS3[nGenJets]/F");
-  //tree->Branch("drGenCHS3",drGenCHS3,"drGenCHS3[nGenJets]/F");
-
-  //tree->Branch("ptGenCHS1",ptGenCHS1,"ptGenCHS1[nGenJets]/F");
-  //tree->Branch("drGenCHS1",drGenCHS1,"drGenCHS1[nGenJets]/F");
-
-  //tree->Branch("ptGenCHS2",ptGenCHS2,"ptGenCHS2[nGenJets]/F");
-  //tree->Branch("drGenCHS2",drGenCHS2,"drGenCHS2[nGenJets]/F");
- 
-  //tree->Branch("ptGenCHS4",ptGenCHS4,"ptGenCHS4[nGenJets]/F");
-  //tree->Branch("drGenCHS4",drGenCHS4,"drGenCHS4[nGenJets]/F");
   
   tree-> Branch("nPUtrue",&nPUtrue,"nPUtrue/I");
   tree-> Branch("nPV",&nPV,"nPV/I");
@@ -544,6 +565,121 @@ Ntuplizer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   desc.setUnknown();
   descriptions.addDefault(desc);
   }*/
+
+void Ntuplizer::GenJetAnalyzer(std::vector<pat::Jet>& Jets)
+{
+
+  for(unsigned int i=0; i < Jets.size(); i++) {
+
+    //std::cout << "Jet n. " << i <<std::endl;
+    
+    if(Jets.at(i).genJet()){
+      std::vector<edm::Ptr<reco::Candidate>> GenJetConstituentVect = Jets.at(i).genJet()->getJetConstituents();
+      //std::cout << "Gen Jet: " << std::endl;
+      //std::cout << "had energy: " << Jets.at(i).genJet()->hadEnergy() << std::endl;
+      //std::cout << "invisible energy: " << Jets.at(i).genJet()->invisibleEnergy() << std::endl;
+      //std::cout << "em energy: " << Jets.at(i).genJet()->emEnergy() << std::endl;
+
+      float emEnergy = 0;
+      float eleEnergy = 0;
+      float photonEnergy = 0;
+      float muEnergy = 0;
+      float cHadEnergy = 0;
+      float nHadEnergy = 0;
+      int chargedMulti = 0;
+      int neutralMulti = 0;
+      int multiplicity = 0;
+      for(unsigned int k = 0; k < GenJetConstituentVect.size(); k++){
+	//std::cout << "Jet const n. " << k << std::endl;
+	//std::cout << "pdgId: " << GenJetConstituentVect[k]->pdgId() << std::endl;
+	//std::cout << "energy: " << GenJetConstituentVect[k]->energy() << std::endl;
+	//std::cout << "charge: " << GenJetConstituentVect[k]->charge() << std::endl;
+	if(abs(GenJetConstituentVect[k]->pdgId())==22) photonEnergy += GenJetConstituentVect[k]->energy();
+	if(abs(GenJetConstituentVect[k]->pdgId())==11) eleEnergy += GenJetConstituentVect[k]->energy();
+	if(abs(GenJetConstituentVect[k]->pdgId())==13) muEnergy += GenJetConstituentVect[k]->energy();
+	if(abs(GenJetConstituentVect[k]->pdgId())>22 && GenJetConstituentVect[k]->charge()==0) nHadEnergy += GenJetConstituentVect[k]->energy();
+	if(abs(GenJetConstituentVect[k]->pdgId())>22 && GenJetConstituentVect[k]->charge()!=0) cHadEnergy += GenJetConstituentVect[k]->energy();
+	if(GenJetConstituentVect[k]->charge()==0) neutralMulti++;
+	if(GenJetConstituentVect[k]->charge()!=0) chargedMulti++;
+      //Methods like isMuon, isElectron, isPhoton do not work. Always getting 0.
+      }
+      multiplicity =  GenJetConstituentVect.size();
+      //std::cout << "from constituents - ele energy: " << eleEnergy << std::endl;
+      //std::cout << "from constituents - photon energy: " << photonEnergy << std::endl;
+      //std::cout << "from constituents - nHad energy: " << nHadEnergy << std::endl;
+      //std::cout << "from constituents - cHad energy: " << cHadEnergy << std::endl;
+      //std::cout << "from constituents - total Had energy: " << nHadEnergy+cHadEnergy << std::endl;
+      //std::cout << "from constituents - EM energy: " << eleEnergy+photonEnergy << std::endl;
+
+      //Energies
+      Jets.at(i).addUserFloat("cHadEGen", cHadEnergy);
+      Jets.at(i).addUserFloat("nHadEGen", nHadEnergy);
+
+      Jets.at(i).addUserFloat("emEGen", eleEnergy+photonEnergy);
+      Jets.at(i).addUserFloat("eleEGen", eleEnergy);
+      Jets.at(i).addUserFloat("photonEGen", photonEnergy);
+
+
+      //Multiplicities
+      Jets.at(i).addUserFloat("nMultiGen", float(neutralMulti));
+      Jets.at(i).addUserFloat("cMultiGen", float(chargedMulti));
+
+      Jets.at(i).addUserFloat("multiGen", float(multiplicity));
+
+    }    
+
+  }
+
+}
+
+
+// PFJet Quality ID 2015-2016: see https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_13_TeV_data
+bool Ntuplizer::isLooseJet(pat::Jet& jet)
+{
+  if(fabs(jet.eta())<=2.7){ /// |eta| < 2.7
+    if(jet.neutralHadronEnergyFraction()>=0.99) return false;
+    if(jet.neutralEmEnergyFraction()>=0.99) return false;
+    if((jet.chargedMultiplicity()+jet.neutralMultiplicity())<=1) return false;
+    if(fabs(jet.eta())<=2.4) { /// |eta| < 2.4
+      if(jet.chargedHadronEnergyFraction()<=0.) return false;
+      if(jet.chargedMultiplicity()<=0) return false;
+      if(jet.chargedEmEnergyFraction()>=0.99) return false;
+    }
+  }
+  else{ /// |eta| > 2.7
+    if(jet.neutralEmEnergyFraction()>=0.90) return false;
+    if (fabs(jet.eta())<=3.0) { /// 2.7 < |eta| < 3.0
+      if(jet.neutralMultiplicity()<=2) return false;
+    }
+    else{ /// |eta| > 3.0                                                                                                                                                       
+      if(jet.neutralMultiplicity()<=10) return false;
+    }
+  }
+  return true;
+}
+
+bool Ntuplizer::isTightJet(pat::Jet& jet) {
+  if(fabs(jet.eta())<=2.7){ /// |eta| < 2.7
+    if(jet.neutralHadronEnergyFraction()>=0.90) return false;
+    if(jet.neutralEmEnergyFraction()>=0.90) return false;
+    if((jet.chargedMultiplicity()+jet.neutralMultiplicity())<=1) return false;
+    if(fabs(jet.eta())<=2.4) { /// |eta| < 2.4
+      if(jet.chargedHadronEnergyFraction()<=0.) return false;
+      if(jet.chargedMultiplicity()<=0) return false;
+      if(jet.chargedEmEnergyFraction()>=0.99) return false;
+    }
+  }
+  else{ /// |eta| > 2.7
+    if(jet.neutralEmEnergyFraction()>=0.90) return false;
+    if (fabs(jet.eta())<=3.0) { /// 2.7 < |eta| < 3.0                                                                                                                           
+      if(jet.neutralMultiplicity()<=2) return false;
+    }
+    else{ /// |eta| > 3.0
+      if(jet.neutralMultiplicity()<=10) return false;
+    }
+  }
+  return true;
+}
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(Ntuplizer);
