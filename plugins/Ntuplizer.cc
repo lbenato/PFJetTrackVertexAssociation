@@ -102,14 +102,17 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   double jetpt;
   edm::EDGetTokenT< std::vector<PileupSummaryInfo> > pileupSummaryToken_;
   edm::EDGetTokenT< std::vector<reco::Vertex> > PVToken_;
+  edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandToken_;
   edm::EDGetTokenT<pat::JetCollection> jetToken1_;
   edm::EDGetTokenT<pat::JetCollection> jetToken2_;
   edm::EDGetTokenT<pat::JetCollection> jetToken3_;
   edm::EDGetTokenT<pat::JetCollection> jetToken4_;
+  edm::EDGetTokenT<pat::JetCollection> jetToken5_;
   edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken1_;
   edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken2_;
   edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken3_;
   edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken4_;
+  edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken5_;
   edm::EDGetTokenT< std::vector<reco::GenJet> > GenJetToken_;
   edm::EDGetTokenT< double> rhoToken_;
   
@@ -135,7 +138,8 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   //float ptGenCHS3[njets_max],drGenCHS3[njets_max];
   //float drGenCHS4[njets_max], ptGenCHS4[njets_max];
 
-  long int nGenJets, nJetsNew1, nJetsNew2, nJetsNew3, nJetsNew4, nJets, nPUtrue, EventNumber, LumiNumber, RunNumber, nPV;
+  long int nGenJets, nJetsNew1, nJetsNew2, nJetsNew3, nJetsNew4, nJetsNew5, nJets, nPUtrue, EventNumber, LumiNumber, RunNumber, nPV;
+  int nPFCandidates, nPFCandidatesHighPurity;
   float  rho;
   //int JetId;
   bool isVerbose, isMC;
@@ -146,6 +150,7 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   std::vector<JetType> JetsNew2;
   std::vector<JetType> JetsNew3;
   std::vector<JetType> JetsNew4;
+  std::vector<JetType> JetsNew5;
 
 };
 
@@ -166,10 +171,12 @@ Ntuplizer::Ntuplizer(const edm::ParameterSet& iConfig):
   jetpt(iConfig.getParameter <double>("jetpt")),  
   pileupSummaryToken_(consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter <edm::InputTag>("pileup"))),
   PVToken_(consumes<std::vector<reco::Vertex>>(iConfig.getParameter <edm::InputTag>("vertices"))),
+  PFCandToken_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidates"))),
   jetToken1_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets1"))),  
   jetToken2_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets2"))),  
   jetToken3_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets3"))),  
   jetToken4_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets4"))),  
+  jetToken5_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets5"))),  
   GenJetToken_(consumes<std::vector<reco::GenJet>>(iConfig.getParameter <edm::InputTag>("genjets"))),  
   rhoToken_(consumes<double>(iConfig.getParameter <edm::InputTag>("rhosrc"))),
   isVerbose(iConfig.getParameter<bool> ("verbose"))
@@ -182,6 +189,7 @@ Ntuplizer::Ntuplizer(const edm::ParameterSet& iConfig):
   newJetToken2_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew2CHS"));//("selectedPatJetsak4PFJetsNew2CHS"));//
   newJetToken3_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew3CHS"));//("selectedPatJetsak4PFJetsNew3CHS"));//
   newJetToken4_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew4CHS"));//("selectedPatJetsak4PFJetsNew4CHS"));//
+  newJetToken5_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew5CHS"));//("selectedPatJetsak4PFJetsNew4CHS"));//
   //GenJetToken_ = consumes<std::vector<reco::GenJet> >(edm::InputTag("slimmedGenJets"));
   //now do what ever initialization is needed
   usesResource("TFileService");
@@ -216,7 +224,8 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   //Initialization
   EventNumber = LumiNumber = RunNumber = nPV = 0;
-  nJets = nJetsNew1 = nJetsNew2 = nJetsNew3 = nJetsNew4 = 0;
+  nJets = nJetsNew1 = nJetsNew2 = nJetsNew3 = nJetsNew4 = nJetsNew5 = 0;
+  nPFCandidates = nPFCandidatesHighPurity = 0;
   //JetId = 0;
   isMC = false;
 
@@ -461,6 +470,51 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   Ntuplizer::GenJetAnalyzer(JetsVectNew4);
 
+  ////**********////
+  //// JetsNew5 ////
+  ////**********////
+
+  edm::Handle<pat::JetCollection> PFJetsCollectionNew5;
+  iEvent.getByToken(jetToken5_,PFJetsCollectionNew5);
+
+  //Fill Jet vector
+  std::vector<pat::Jet> JetsVectNew5;
+  for(std::vector<pat::Jet>::const_iterator it=PFJetsCollectionNew5->begin(); it!=PFJetsCollectionNew5->end(); ++it) {
+    pat::Jet jet=*it;
+    //JetId not from pset!!!
+    //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
+    //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
+    //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
+    //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
+    jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
+    jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
+    jet.addUserFloat("nEmEFrac", jet.neutralEmEnergyFraction());
+    jet.addUserFloat("cEmEFrac", jet.chargedEmEnergyFraction());
+    jet.addUserFloat("cmuEFrac", jet.chargedMuEnergyFraction());
+    jet.addUserFloat("muEFrac", jet.muonEnergyFraction());
+    jet.addUserFloat("eleEFrac", jet.electronEnergyFraction());
+    jet.addUserFloat("photonEFrac", jet.photonEnergyFraction());
+    JetsVectNew5.push_back(jet);
+
+  }
+  nJetsNew5 = JetsVectNew5.size();
+  JetsNew5.clear();
+
+  Ntuplizer::GenJetAnalyzer(JetsVectNew5);
+
+  ////**************////
+  ////PF candidates////
+  ////**************////
+
+  edm::Handle<pat::PackedCandidateCollection> PFCandCollection;
+  iEvent.getByToken(PFCandToken_, PFCandCollection);
+  for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandCollection->begin(); it!=PFCandCollection->end(); ++it) {
+    pat::PackedCandidate pfcand=*it;
+    nPFCandidates++;
+    if(pfcand.trackHighPurity()) nPFCandidatesHighPurity++;
+  }
 
 
   edm::Handle<std::vector<reco::GenJet> > GenJetsCollection;
@@ -486,6 +540,7 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     for(unsigned int i = 0; i < JetsVectNew2.size(); i++) std::cout << "  CHS AK4 New2 jet  [" << i << "]\tpt: " << JetsVectNew2[i].pt() << "\teta: " << JetsVectNew2[i].eta() << "\tphi: " << JetsVectNew2[i].phi() << "\tmass: " << JetsVectNew2[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew3.size(); i++) std::cout << "  CHS AK4 New3 jet  [" << i << "]\tpt: " << JetsVectNew3[i].pt() << "\teta: " << JetsVectNew3[i].eta() << "\tphi: " << JetsVectNew3[i].phi() << "\tmass: " << JetsVectNew3[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew4.size(); i++) std::cout << "  CHS AK4 New4 jet  [" << i << "]\tpt: " << JetsVectNew4[i].pt() << "\teta: " << JetsVectNew4[i].eta() << "\tphi: " << JetsVectNew4[i].phi() << "\tmass: " << JetsVectNew4[i].mass() << std::endl;
+    for(unsigned int i = 0; i < JetsVectNew5.size(); i++) std::cout << "  CHS AK4 New5 jet  [" << i << "]\tpt: " << JetsVectNew5[i].pt() << "\teta: " << JetsVectNew5[i].eta() << "\tphi: " << JetsVectNew5[i].phi() << "\tmass: " << JetsVectNew5[i].mass() << std::endl;
   }
 
   for(unsigned int i = 0; i < JetsVect.size(); i++) Jets.push_back( JetType() );
@@ -493,12 +548,14 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   for(unsigned int i = 0; i < JetsVectNew2.size(); i++) JetsNew2.push_back( JetType() );
   for(unsigned int i = 0; i < JetsVectNew3.size(); i++) JetsNew3.push_back( JetType() );
   for(unsigned int i = 0; i < JetsVectNew4.size(); i++) JetsNew4.push_back( JetType() );
+  for(unsigned int i = 0; i < JetsVectNew5.size(); i++) JetsNew5.push_back( JetType() );
 
   for(unsigned int i = 0; i < JetsVect.size(); i++) ObjectsFormat::FillJetType(Jets[i], &JetsVect[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew1.size(); i++) ObjectsFormat::FillJetType(JetsNew1[i], &JetsVectNew1[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew2.size(); i++) ObjectsFormat::FillJetType(JetsNew2[i], &JetsVectNew2[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew3.size(); i++) ObjectsFormat::FillJetType(JetsNew3[i], &JetsVectNew3[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew4.size(); i++) ObjectsFormat::FillJetType(JetsNew4[i], &JetsVectNew4[i], isMC);
+  for(unsigned int i = 0; i < JetsVectNew5.size(); i++) ObjectsFormat::FillJetType(JetsNew5[i], &JetsVectNew5[i], isMC);
 
 
 
@@ -533,6 +590,7 @@ Ntuplizer::beginJob()
   tree->Branch("nJetsNew2",&nJetsNew2,"nJetsNew2/I");
   tree->Branch("nJetsNew3",&nJetsNew3,"nJetsNew3/I");
   tree->Branch("nJetsNew4",&nJetsNew4,"nJetsNew4/I");
+  tree->Branch("nJetsNew5",&nJetsNew5,"nJetsNew5/I");
   tree->Branch("nGenJets",&nGenJets,"nGenJets/I");
   
   tree-> Branch("nPUtrue",&nPUtrue,"nPUtrue/I");
@@ -547,7 +605,9 @@ Ntuplizer::beginJob()
   tree -> Branch("JetsNew2", &JetsNew2);
   tree -> Branch("JetsNew3", &JetsNew3);
   tree -> Branch("JetsNew4", &JetsNew4);
-
+  tree -> Branch("JetsNew5", &JetsNew5);
+  tree -> Branch("nPFCandidates" , &nPFCandidates, "nPFCandidates/I");
+  tree -> Branch("nPFCandidatesHighPurity", &nPFCandidatesHighPurity, "nPFCandidatesHighPurity/I");
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
