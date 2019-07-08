@@ -11,124 +11,16 @@ from ROOT import TLegend, TLatex, TText, TLine, TBox, TGaxis
 
 #### IMPORT SAMPLES AND VARIABLES DICTIONARIES ####
 
-from Analyzer.LLP.samples import sample, samples
-from Analyzer.LLP.variables import *
-from Analyzer.LLP.selections import *
-#selections as string in different file?
-#project and draw functions in different files?
-
-
-'''
-def plot(var, cut, cut_s, norm=False):
-    ### Preliminary Operations ###
-    
-    # Substitute cut
-    pd = ""
-    channel = ""
-    plotdir = ""
-    shortcut = cut
-    shortcut_s = cut_s
-    longcut = longcut_s = ""
-    if cut in selection:
-        plotdir = cut
-        longcut = selection[cut]
-    if cut_s in selection:
-        #The function does not work.
-        ################longcut_s = "Jets.Jets[0].pt>30 && Jets.Jets[0].eta<2 && Jets.Jets[0].isGenMatched>-5 && Jets.Jets[0].isMatchedToMatchedCHSJet>-2 && Jets.Jets[0].isMatchedToMatchedCHSJet<=1 "#Jets.Jets[0].isMatchedToMatchedCHSJet"#selection[cut_s] #+ " && Jets.Jets[0].isMatchedToMatchedCHSJet "# + signal_matching_string(var)
-        #longcut_s = selection[cut_s] + signal_matching_string(var)
-        #print "VERIFY: " , longcut_s
-        longcut_s = selection[cut_s]
-
-    # Determine Primary Dataset
-    pd = getPrimaryDataset(longcut)
-    if len(data)>0 and len(pd)==0: raw_input("Warning: Primary Dataset not recognized, continue?")
-    
-    # Determine weight
-    weight = "EventWeight"
-    print weight
-
-    print "Considered ntuples: ", NTUPLEDIR
-    print "Plotting", var#, "in", channel, "channel with:"
-    print "  dataset:", pd
-    print "  weight :", weight
-    print "  cut    :", longcut
-    print "  cut on signal    :", longcut_s
-    suffix = ""
-
-    for i, s in enumerate(back):
-        print "back sample: ", s
-
-
-    ### Create and fill MC histograms ###
-    print "doing project . . . "
-    hist = project(var, longcut, longcut_s, weight, data+back+sign, pd, NTUPLEDIR)
-    
-    # Background sum
-    if len(back)>0:
-        if options.blind: RATIO = False
-        else: RATIO = 4
-        hist['BkgSum'] = hist['data_obs'].Clone("BkgSum") if 'data_obs' in hist else hist[back[0]].Clone("BkgSum")
-        hist['BkgSum'].Reset("MICES")
-        hist['BkgSum'].SetFillStyle(3003)
-        hist['BkgSum'].SetFillColor(1)
-        for i, s in enumerate(back):
-            hist['BkgSum'].Add(hist[s])
-    
-    if len(back)==0 and len(data)==0:
-        suffix = ''
-        RATIO = False
-        for i, s in enumerate(sign):
-            hist[s].Scale(1./hist[s].Integral())
-            hist[s].SetFillStyle(0)
-    
-    if norm:
-        sfnorm = hist['data_obs'].Integral()/hist['BkgSum'].Integral()
-        for i, s in enumerate(back+['BkgSum']): hist[s].Scale(sfnorm)
-        
-    ### Plot ###
-
-    if len(data+back)>0:
-        if options.blind: RATIO = 0
-        else: RATIO = 4
-        out = draw(hist, data if not options.blind else [], back, sign, SIGNAL, RATIO, POISSON, variable[var]['log'])
-    else:
-        out = drawSignal(hist, sign)
-
-    # Other plot operations
-    out[0].cd(1)
-    drawCMS(LUMI, "Preliminary")
-    drawRegion(shortcut)
-    drawAnalysis("LL")
-    out[0].Update()
-    
-    # Save
-    SAVE = True
-    pathname = PLOTDIR+plotdir
-    #if gROOT.IsBatch() and SAVE:
-    if SAVE:
-        if not os.path.exists(pathname): os.makedirs(pathname)
-        suffix+= "_"+str(options.region)
-        if len(data+back)>0:
-            out[0].Print(pathname+"/"+var.replace('.', '_')+suffix+".png")
-            out[0].Print(pathname+"/"+var.replace('.', '_')+suffix+".pdf")
-        else:
-            out[0].Print(pathname+"/"+var.replace('.', '_')+suffix+"_signal.png")
-            out[0].Print(pathname+"/"+var.replace('.', '_')+suffix+"_signal.pdf")    
-    ### Other operations ###
-    # Print table
-    if len(data+back)>0: printTable(hist, sign)
-    
-    if not gROOT.IsBatch(): raw_input("Press Enter to continue...")
-'''
-
+from Analyzer.PFJetTrackVertexAssociation.samples import sample, samples
+from Analyzer.PFJetTrackVertexAssociation.variables import *
+from Analyzer.PFJetTrackVertexAssociation.selections import *
 
 ##################
 #    PROJECT     #
 ##################
 
 
-def project(var, cut, cut_s, weight, samplelist, pd, ntupledir, treename="ntuple/tree"):
-#def project(var, cut, cut_s, weight, samplelist, pd, ntupledir, treename="trigger/tree"):
+def project(var, cut, weight, samplelist, ntupledir, treename="ntuple/tree"):
     # Create dict
     file = {}
     tree = {}
@@ -144,31 +36,16 @@ def project(var, cut, cut_s, weight, samplelist, pd, ntupledir, treename="ntuple
         else: # Project from tree
             chain[s] = TChain(treename)
             for j, ss in enumerate(samples[s]['files']):
-                if not 'data' in s or ('data' in s and ss in pd):
-                    chain[s].Add(ntupledir + ss + ".root")
+                #if not 'data' in s or ('data' in s and ss in pd):#not needed
+                chain[s].Add(ntupledir + ss + ".root")
             if variable[var]['nbins']>0: hist[s] = TH1F(s, ";"+variable[var]['title'], variable[var]['nbins'], variable[var]['min'], variable[var]['max']) # Init histogram
             else: hist[s] = TH1F(s, ";"+variable[var]['title'], len(variable[var]['bins'])-1, array('f', variable[var]['bins']))
             hist[s].Sumw2()
             tmpcut = cut
-            tmpcut_s = cut_s
-            if not 'data' in s:
-                if s.endswith('_0b'): tmpcut += " && nBJets==0"
-                elif s.endswith('_1b'): tmpcut += " && nBJets==1"
-                elif s.endswith('_2b'): tmpcut += " && nBJets>=2"
-                if s.endswith('_0l'): tmpcut += " && genNl==0"
-                elif s.endswith('_1l'): tmpcut += " && genNl==1"
-                elif s.endswith('_2l'): tmpcut += " && genNl>=2"
             cutstring = "("+weight+")" + ("*("+tmpcut+")" if len(tmpcut)>0 else "")
-            cutstring_s = "("+weight+")" + ("*("+tmpcut_s+")" if len(tmpcut_s)>0 else "")
-            if "VBFH_M" in s:#important bugfix! Not applying jet matching to signal!
-                chain[s].Project(s, var, cutstring_s)
-            else:
-                chain[s].Project(s, var, cutstring)
+            chain[s].Project(s, var, cutstring)
             hist[s].SetOption("%s" % chain[s].GetTree().GetEntriesFast())
             hist[s].Scale(samples[s]['weight'] if hist[s].Integral() >= 0 else 0)
-            #if s in sign:
-                #print "Is it empty?"
-                #print s, hist[s].Integral()
 
         hist[s].SetFillColor(samples[s]['fillcolor'])
         hist[s].SetFillStyle(samples[s]['fillstyle'])
@@ -338,11 +215,11 @@ def drawSignal(hist, sign, log=False):
     leg.SetBorderSize(0)
     leg.SetFillStyle(0) #1001
     leg.SetFillColor(0)
-    for i, s in enumerate(sign): leg.AddEntry(hist[s], samples[s]['label'], "fl")
     
     
     # --- Display ---
-    c1 = TCanvas("c1", hist.values()[-1].GetXaxis().GetTitle(), 800, 600)
+    #?#c1 = TCanvas("c1", hist.values()[-1].GetXaxis().GetTitle(), 800, 600)
+    c1 = TCanvas("c1", "aaaa", 800, 600)
     
     c1.cd(1)
     c1.GetPad(0).SetTopMargin(0.06)
@@ -355,17 +232,27 @@ def drawSignal(hist, sign, log=False):
     max_val = 0
     for i, s in enumerate(sign): 
         hist[s].SetLineWidth(3)
-        hist[s].Draw("SAME, HIST" if i>0 else "HIST") # signals
+        hist[s].SetFillStyle(0)
+        hist[s].SetMarkerStyle(0)
+        hist[s].SetMarkerColor(samples[s]['linecolor'])
+        hist[s].SetFillColor(samples[s]['fillcolor'])
+        hist[s].SetLineColor(samples[s]['linecolor'])
+        hist[s].SetLineStyle(samples[s]['linestyle'])
+        hist[s].Draw("SAME, HISTO" if i>0 else "HISTO") # signals
+        err = hist[s].Clone()
+        err.SetName("err")
+        err.SetDirectory(0)
+        err.SetFillColor(1)
+        err.SetFillStyle(3001)
+        err.SetMarkerColor(1)
+        err.SetMarkerStyle(10)
+        err.Draw("SAME,P")
         max_val = max(max_val,hist[s].GetMaximum())
+
     
-    #?#hist[sign[0]].GetXaxis().SetRangeUser(0., 1500)
-    #?hist[sign[0]].GetYaxis().SetTitleOffset(hist[sign[-1]].GetYaxis().GetTitleOffset()*1.075)
-    #?hist[sign[0]].SetMaximum(max(hist[sign[0]].GetMaximum(), hist[sign[-1]].GetMaximum())*1.25)
-    #?hist[sign[0]].SetMinimum(0.)
 
     hist[sign[0]].GetYaxis().SetTitleOffset(hist[sign[-1]].GetYaxis().GetTitleOffset()*1.075)
     hist[sign[0]].SetMaximum(max_val*1.25)
-    #hist[sign[0]].SetMinimum(0.)
     
     if log:
         hist[sign[0]].GetYaxis().SetNoExponent(hist[sign[0]].GetMaximum() < 1.e4)
@@ -373,6 +260,9 @@ def drawSignal(hist, sign, log=False):
 
     if log:
         c1.GetPad(0).SetLogy()
+
+    for i, s in enumerate(sign):
+        leg.AddEntry(hist[s], samples[s]['label'], "fl")
 
     
     leg.Draw()
@@ -494,7 +384,7 @@ def setBotStyle(h, r=4, fixRange=True, miny=0., maxy=2.):
 ### DRAW UTILS ###
 ##################
 
-def drawCMS(LUMI, text, onTop=False, left_marg_CMS=0.15,data_obs=[]):
+def drawCMS(LUMI, text, onTop=True, left_marg_CMS=0.15,data_obs=[]):
     latex = TLatex()
     latex.SetNDC()
     latex.SetTextSize(0.04)

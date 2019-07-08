@@ -6,11 +6,45 @@ sample = {
     },
 }
 
+lista = []
+for a in range(1,100,1):
+#for a in range(1,2,1):
+    name = 'output_' + str(a)
+    lista.append(name)
+
+
 samples = {
     'QCD' : {
-        'files' : ['QCD_HT50to100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8-v1'],
-        'title' : 'QCD',
+        'files' : lista,#['output_1'],
+        'fillcolor' : 881,
+        'fillstyle' : 1001,
+        'linecolor' : 881,
+        'linewidth' : 2,
+        'linestyle' : 1,
         'label' : 'QCD',
-        'xsec' : 246300000.0,#pb 
-    }
+        'weight': 1.,
+        'plot': True,
+    },
+    'QCD_Pt_15to30' : {
+        'files' : ['QCD_Pt_15to30'],
+        'fillcolor' : 881,
+        'fillstyle' : 1001,
+        'linecolor' : 881,
+        'linewidth' : 2,
+        'linestyle' : 1,
+        'label' : 'QCD Pt 15to30',
+        'weight': 1.,
+        'plot': True,
+    },
+    'QCD_Pt_30to50' : {
+        'files' : ['QCD_Pt_30to50'],
+        'fillcolor' : 881,
+        'fillstyle' : 1001,
+        'linecolor' : 881,
+        'linewidth' : 2,
+        'linestyle' : 1,
+        'label' : 'QCD Pt 30to50',
+        'weight': 1.,
+        'plot': True,
+    },
 }
