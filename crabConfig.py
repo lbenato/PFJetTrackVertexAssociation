@@ -8,7 +8,7 @@ import os
 config = config()
 
 ###Name of the main crab area
-config.General.workArea = 'PFCHS_v0_debug_proxy'
+config.General.workArea = 'PFCHS_v0_debug_proxy_naf'
 ###If not planning to transfer on T2, this could probably be commented out...
 config.General.transferOutputs = True
 config.General.transferLogs = True
@@ -45,7 +45,7 @@ config.Data.unitsPerJob = 10000
 #config.Data.totalUnits = 100000000
 
 ###In case you need to publish your output files in a T2 (they must be edm files)
-config.Data.outLFNDirBase = '/store/user/lbenato/PFCHS_v0_debug_proxy'
+config.Data.outLFNDirBase = '/store/user/lbenato/PFCHS_v0_debug_proxy_naf'
 config.Data.publication = False
 #config.Data.outputDatasetTag = 'recluster_ak4Jets_miniaod_29May2018'#only for generation of EDM files
 #config.Data.publishDBS = 'https://cmsweb.cern.ch/dbs/prod/phys03/DBSWriter/'#only possible for generation of EDM files
