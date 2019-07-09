@@ -8,7 +8,7 @@ import os
 config = config()
 
 ###Name of the main crab area
-config.General.workArea = 'PFCHS_v0_debug_proxy_naf'
+config.General.workArea = 'PFCHS_v1_debug_proxy_naf'
 ###If not planning to transfer on T2, this could probably be commented out...
 config.General.transferOutputs = True
 config.General.transferLogs = True
@@ -21,10 +21,15 @@ config.JobType.psetName = 'python/ReclusterJets.py'
 #config.JobType.inputFiles = ['data']
 
 ###Name of the working dir
+#config.General.requestName = 'QCD_Pt_15to30_TuneCP5_13TeV_pythia8-v1'
+#config.General.requestName = 'QCD_Pt_30to50_TuneCP5_13TeV_pythia8-v1'
 config.General.requestName = 'QCD_Pt_80to120_TuneCP5_13TeV_pythia8-v1'
 
 ###Name of the sample in DAS
+#config.Data.inputDataset =  '/QCD_Pt_15to30_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'
+#config.Data.inputDataset =  '/QCD_Pt_30to50_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'
 config.Data.inputDataset =  '/QCD_Pt_80to120_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'
+
 
 #If private production:
 #config.Data.inputDBS = 'phys03'
@@ -45,7 +50,7 @@ config.Data.unitsPerJob = 10000
 #config.Data.totalUnits = 100000000
 
 ###In case you need to publish your output files in a T2 (they must be edm files)
-config.Data.outLFNDirBase = '/store/user/lbenato/PFCHS_v0_debug_proxy_naf'
+config.Data.outLFNDirBase = '/store/user/lbenato/PFCHS_v1_debug_proxy_naf'
 config.Data.publication = False
 #config.Data.outputDatasetTag = 'recluster_ak4Jets_miniaod_29May2018'#only for generation of EDM files
 #config.Data.publishDBS = 'https://cmsweb.cern.ch/dbs/prod/phys03/DBSWriter/'#only possible for generation of EDM files
