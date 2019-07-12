@@ -185,6 +185,17 @@ bTagDiscriminators = [
 ]
 
 from PhysicsTools.PatAlgos.tools.jetTools import *
+##Update JEC for slimmedJets
+updateJetCollection(
+    process,
+    labelName = 'AK4PFCHS',
+    jetSource = cms.InputTag('slimmedJets'),
+    algo = 'ak4',
+    rParam = 0.4,
+    jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None'),
+)
+
+
 ## Add PAT jet collection based on the above-defined ak4PFJetsCHS
 '''addJetCollection(
     process,
@@ -280,7 +291,8 @@ process.selectedPatJets = cms.EDFilter("PATJetSelector",
     cut = cms.string('pt > 15'),
     cutLoose = cms.string(''),
     nLoose = cms.uint32(0),
-    src = cms.InputTag("slimmedJets")
+    #src = cms.InputTag("slimmedJets")
+    src = cms.InputTag("updatedPatJetsAK4PFCHS")#slimmedJets with updated JEC
 )
 task.add(process.selectedPatJets)
 
@@ -373,6 +385,8 @@ process.seq = cms.Sequence(
     process.patJetsNew3CHS *
     process.patJetsNew4CHS *
     process.patJetsNew5CHS *
+    #updated JEC for slimmedJets:
+    process.updatedPatJetsAK4PFCHS *
     #selected pat jets
     process.selectedPatJets *
     process.selectedPatJetsNew1CHS *
