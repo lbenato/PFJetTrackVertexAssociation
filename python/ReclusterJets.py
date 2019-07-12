@@ -10,7 +10,7 @@ task = cms.Task()
 
 ## Events to process
 #process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 
 ## Messagge logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -245,6 +245,7 @@ addJetCollection(
     rParam = 0.4
 )
 
+#Important! This collection behaves more like PF w/o chs!
 addJetCollection(
     process,
     labelName = 'New4CHS',
@@ -253,7 +254,7 @@ addJetCollection(
     pfCandidates = cms.InputTag('pfNew4CHS'),
     svSource = cms.InputTag('slimmedSecondaryVertices'),
     btagDiscriminators = bTagDiscriminators,
-    jetCorrections = ('AK4PFchs', ['L1FastJet', 'L2Relative', 'L3Absolute'], 'None'),
+    jetCorrections = ('AK4PF', ['L1FastJet', 'L2Relative', 'L3Absolute'], 'None'),
     genJetCollection = cms.InputTag('ak4GenJetsNoNu'),
     genParticles = cms.InputTag('prunedGenParticles'),
     algo = 'AK',
@@ -332,6 +333,11 @@ process.ntuple = cms.EDAnalyzer('Ntuplizer',
   pileup = cms.InputTag('slimmedAddPileupInfo'),
   vertices = cms.InputTag('offlineSlimmedPrimaryVertices'),
   pfcandidates = cms.InputTag('packedPFCandidates'),
+  #pfcandidates1 = cms.InputTag('pfNew1CHS'),#They are edm::PtrVector<reco::Candidate>!
+  #pfcandidates2 = cms.InputTag('pfNew2CHS'),
+  #pfcandidates3 = cms.InputTag('pfNew3CHS'),
+  #pfcandidates4 = cms.InputTag('pfNew4CHS'),
+  #pfcandidates5 = cms.InputTag('pfNew5CHS'),
   jets1 = cms.InputTag('selectedPatJetsNew1CHS'),
   jets2 = cms.InputTag('selectedPatJetsNew2CHS'),
   jets3 = cms.InputTag('selectedPatJetsNew3CHS'),

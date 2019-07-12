@@ -29,6 +29,22 @@ var_template = {
       "max" : 49.5,
       "log" : False,
     },
+
+    "nPFCandidates": {
+      "title" : "number of PF candidates in the event",
+      "nbins" : 100,
+      "min" : 0.,
+      "max" : 5000,
+      "log" : False,
+    },
+    "nPFCandidatesHighPurity": {
+      "title" : "number of HighPurity PF candidates in the event",
+      "nbins" : 60,
+      "min" : 0.,
+      "max" : 3000,
+      "log" : False,
+    },
+
     "nJets": {
       "title" : "number of jets",
       "nbins" : 20,
@@ -673,8 +689,7 @@ var_template = {
         "log" : True,
     },
 
-
-
+#JetsNew1
     "JetsNew1.npr": {
         "title" : "n. of constituents",
         "nbins" : 100,
@@ -682,6 +697,51 @@ var_template = {
         "max" : 100,
         "log" : True,
     },
+    "JetsNew1.cMulti": {
+        "title" : "charged multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew1.nMulti": {
+        "title" : "neutral multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew1.nHadMulti": {
+        "title" : "neutral hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew1.cHadMulti": {
+        "title" : "charged hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew1.eleMulti": {
+        "title" : "electron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew1.photonMulti": {
+        "title" : "photon multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+
+
+#JetsNew2
     "JetsNew2.npr": {
         "title" : "n. of constituents",
         "nbins" : 100,
@@ -689,6 +749,51 @@ var_template = {
         "max" : 100,
         "log" : True,
     },
+    "JetsNew2.cMulti": {
+        "title" : "charged multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew2.nMulti": {
+        "title" : "neutral multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew2.nHadMulti": {
+        "title" : "neutral hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew2.cHadMulti": {
+        "title" : "charged hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew2.eleMulti": {
+        "title" : "electron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew2.photonMulti": {
+        "title" : "photon multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+
+
+#JetsNew3
     "JetsNew3.npr": {
         "title" : "n. of constituents",
         "nbins" : 100,
@@ -696,6 +801,50 @@ var_template = {
         "max" : 100,
         "log" : True,
     },
+    "JetsNew3.cMulti": {
+        "title" : "charged multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew3.nMulti": {
+        "title" : "neutral multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew3.nHadMulti": {
+        "title" : "neutral hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew3.cHadMulti": {
+        "title" : "charged hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew3.eleMulti": {
+        "title" : "electron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew3.photonMulti": {
+        "title" : "photon multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+
+#JetsNew4
     "JetsNew4.npr": {
         "title" : "n. of constituents",
         "nbins" : 100,
@@ -703,6 +852,52 @@ var_template = {
         "max" : 100,
         "log" : True,
     },
+    "JetsNew4.cMulti": {
+        "title" : "charged multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew4.nMulti": {
+        "title" : "neutral multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew4.nHadMulti": {
+        "title" : "neutral hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew4.cHadMulti": {
+        "title" : "charged hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew4.eleMulti": {
+        "title" : "electron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew4.photonMulti": {
+        "title" : "photon multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+
+#JetsNew5
+
+
     "JetsNew5.npr": {
         "title" : "n. of constituents",
         "nbins" : 100,
@@ -710,7 +905,48 @@ var_template = {
         "max" : 100,
         "log" : True,
     },
-
+    "JetsNew5.cMulti": {
+        "title" : "charged multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew5.nMulti": {
+        "title" : "neutral multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew5.nHadMulti": {
+        "title" : "neutral hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew5.cHadMulti": {
+        "title" : "charged hadron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew5.eleMulti": {
+        "title" : "electron multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
+    "JetsNew5.photonMulti": {
+        "title" : "photon multiplicity",
+        "nbins" : 100,
+        "min" : 0,
+        "max" : 100,
+        "log" : True,
+    },
 
 
 

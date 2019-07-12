@@ -7,9 +7,9 @@ sample = {
 }
 
 lista = []
-#for a in range(1,100,1):
+for a in range(1,100,1):
 #for a in range(3,100,1):
-for a in range(1,2,1):
+#for a in range(1,2,1):
     name = 'output_' + str(a)
     lista.append(name)
 
