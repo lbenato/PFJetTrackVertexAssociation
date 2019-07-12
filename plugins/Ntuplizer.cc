@@ -146,7 +146,7 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   //float drGenCHS4[njets_max], ptGenCHS4[njets_max];
 
   long int nGenJets, nJetsNew1, nJetsNew2, nJetsNew3, nJetsNew4, nJetsNew5, nJets, nPUtrue, EventNumber, LumiNumber, RunNumber, nPV, nPVsel_ndof, nPVsel_pt;
-  int nPFCandidates, nPFCandidatesHighPurity;
+  int nPFCandidates, nPFCandidatesTrack, nPFCandidatesHighPurityTrack;
   //int nPFCandidatesNew1, nPFCandidatesHighPurityNew1;
   //int nPFCandidatesNew2, nPFCandidatesHighPurityNew2;
   //int nPFCandidatesNew3, nPFCandidatesHighPurityNew3;
@@ -242,7 +242,7 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //Initialization
   EventNumber = LumiNumber = RunNumber = nPV = nPVsel_ndof = nPVsel_pt = 0;
   nJets = nJetsNew1 = nJetsNew2 = nJetsNew3 = nJetsNew4 = nJetsNew5 = 0;
-  nPFCandidates = nPFCandidatesHighPurity = 0;
+  nPFCandidates = nPFCandidatesTrack = nPFCandidatesHighPurityTrack = 0;
   //nPFCandidatesNew1 = nPFCandidatesHighPurityNew1 = 0;
   //nPFCandidatesNew2 = nPFCandidatesHighPurityNew2 = 0;
   //nPFCandidatesNew3 = nPFCandidatesHighPurityNew3 = 0;
@@ -269,22 +269,17 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(PVToken_, PVCollection);
   nPV = PVCollection->size();
 
-  //Count good vertices; thanks to Wolfram Erdmann
-  int vert_counter = 0;
+  ////Count good vertices; thanks to Wolfram Erdmann, but works only over AOD
   for(std::vector<reco::Vertex>::const_iterator it=PVCollection->begin(); it!=PVCollection->end(); ++it){
     reco::Vertex v=*it;
-    std::cout << "&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
-    std::cout << "Vertex n. " << vert_counter << std::endl;
-    //option 1: Wolfram's selection
+    //option 0: usual ndof cut
     if(select(v, 0)){
-      std::cout<<"select 0 passed!" << std::endl;
       nPVsel_ndof++;
     }
-    if(select(v, 1)){
-      std::cout<<"select 1 passed!" << std::endl;
-      nPVsel_pt++;
-    }
-    vert_counter++;
+    //option 1: Wolfram's selection
+  //  if(select(v, 1)){
+  //    nPVsel_pt++;
+  //  }
   }
 
   //MET
@@ -552,7 +547,8 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandCollection->begin(); it!=PFCandCollection->end(); ++it) {
     pat::PackedCandidate pfcand=*it;
     nPFCandidates++;
-    if(pfcand.trackHighPurity()) nPFCandidatesHighPurity++;
+    if(pfcand.charge()!=0) nPFCandidatesTrack++;
+    if(pfcand.trackHighPurity()) nPFCandidatesHighPurityTrack++;
   }
   /*
   edm::Handle<pat::PackedCandidateCollection> PFCandCollectionNew1;
@@ -675,7 +671,7 @@ Ntuplizer::beginJob()
   tree-> Branch("nPUtrue",&nPUtrue,"nPUtrue/I");
   tree-> Branch("nPV",&nPV,"nPV/I");
   tree-> Branch("nPVsel_ndof",&nPVsel_ndof,"nPVsel_ndof/I");
-  tree-> Branch("nPVsel_pt",&nPVsel_pt,"nPVsel_pt/I");
+  //tree-> Branch("nPVsel_pt",&nPVsel_pt,"nPVsel_pt/I");
   tree-> Branch("RunNumber",&RunNumber,"RunNumber/I");
   tree-> Branch("LumiNumber",&LumiNumber,"LumiNumber/I");
   tree-> Branch("EventNumber",&EventNumber,"EventNumber/I");
@@ -688,7 +684,8 @@ Ntuplizer::beginJob()
   tree -> Branch("JetsNew4", &JetsNew4);
   tree -> Branch("JetsNew5", &JetsNew5);
   tree -> Branch("nPFCandidates" , &nPFCandidates, "nPFCandidates/I");
-  tree -> Branch("nPFCandidatesHighPurity", &nPFCandidatesHighPurity, "nPFCandidatesHighPurity/I");
+  tree -> Branch("nPFCandidatesTrack", &nPFCandidatesTrack, "nPFCandidatesTrack/I");
+  tree -> Branch("nPFCandidatesHighPurityTrack", &nPFCandidatesHighPurityTrack, "nPFCandidatesHighPurityTrack/I");
   //tree -> Branch("nPFCandidatesNew1" , &nPFCandidatesNew1, "nPFCandidatesNew1/I");
   //tree -> Branch("nPFCandidatesHighPurityNew1", &nPFCandidatesHighPurityNew1, "nPFCandidatesHighPurityNew1/I");
   //tree -> Branch("nPFCandidatesNew2" , &nPFCandidatesNew2, "nPFCandidatesNew2/I");
@@ -836,16 +833,16 @@ bool Ntuplizer::isTightJet(pat::Jet& jet) {
 double Ntuplizer::vertex_ptmax2(const reco::Vertex & v) {
   double ptmax1 = 0;
   double ptmax2 = 0;
-  std::cout << "vertex_ptmax2 in action!" << std::endl;
-  std::cout << "vertex had ntracks: " << v.nTracks(0.5) << std::endl;
-  std::cout << "vertex has n dof: " << v.ndof() << std::endl;
-  std::cout << "vertex has track size: " << v.tracksSize() << std::endl;
+  //std::cout << "vertex_ptmax2 in action!" << std::endl;
+  //std::cout << "vertex had ntracks: " << v.nTracks(0.5) << std::endl;
+  //std::cout << "vertex has n dof: " << v.ndof() << std::endl;
+  //std::cout << "vertex has track size: " << v.tracksSize() << std::endl;
   for(reco::Vertex::trackRef_iterator t = v.tracks_begin(); t != v.tracks_end(); t++){
-    std::cout << "in looop" << std::endl;
-    std::cout << v.trackWeight(*t) << std::endl;
+    //std::cout << "in looop" << std::endl;
+    //std::cout << v.trackWeight(*t) << std::endl;
     if (v.trackWeight(*t) > 0.5){
       double pt = t->get()->pt();
-      std::cout << "pt: " << pt << std::endl;
+      //std::cout << "pt: " << pt << std::endl;
       if (pt > ptmax1){
         ptmax2 = ptmax1;
         ptmax1 = pt;
@@ -863,7 +860,7 @@ bool Ntuplizer::select(const reco::Vertex & v, int level){
      0  !isFake  && ndof>4
      1  !isFake  && ndof>4 &&  ptmax2 >0.4
   */
-  std::cout << Ntuplizer::vertex_ptmax2(v) << std::endl;
+  //std::cout << Ntuplizer::vertex_ptmax2(v) << std::endl;
   if( v.isFake() ) return false;
   if( (level == 0) && (v.ndof()>4) )return true;
   if( (level == 1) && (v.ndof()>4) && (Ntuplizer::vertex_ptmax2(v)>0.4) )return true;

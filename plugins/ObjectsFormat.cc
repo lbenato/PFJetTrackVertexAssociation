@@ -50,17 +50,25 @@ void ObjectsFormat::FillJetType(JetType& I, const pat::Jet* R, bool isMC) {
     I.cmuEFrac    = R->hasUserFloat("cmuEFrac") ? R->userFloat("cmuEFrac") : -1.;//R->chargedMuEnergyFraction();
     I.muE         = R->muonEnergy();
     I.muEFrac     = R->hasUserFloat("muEFrac") ? R->userFloat("muEFrac") : -1.;//R->muonEnergyFraction();
+    I.muMulti     = R->muonMultiplicity();
+    I.muMultiFrac = R->muonMultiplicity()/(R->chargedMultiplicity() + R->neutralMultiplicity());
     I.eleE        = R->electronEnergy();
     I.eleEFrac    = R->hasUserFloat("eleEFrac") ? R->userFloat("eleEFrac") : -1.;//R->electronEnergyFraction();
     I.eleMulti    = R->electronMultiplicity();
+    I.eleMultiFrac = R->electronMultiplicity()/(R->chargedMultiplicity() + R->neutralMultiplicity());
     I.photonE     = R->photonEnergy();
     I.photonEFrac = R->hasUserFloat("photonEFrac") ? R->userFloat("photonEFrac") : -1.;//R->photonEnergyFraction();
     I.photonMulti = R->photonMultiplicity();
+    I.photonMultiFrac = R->photonMultiplicity()/(R->chargedMultiplicity() + R->neutralMultiplicity());
     I.cHadMulti   = R->chargedHadronMultiplicity();
+    I.cHadMultiFrac = R->chargedHadronMultiplicity()/(R->chargedMultiplicity() + R->neutralMultiplicity());
     I.nHadMulti   = R->neutralHadronMultiplicity();
+    I.nHadMultiFrac = R->neutralHadronMultiplicity()/(R->chargedMultiplicity() + R->neutralMultiplicity());
     I.npr         = R->chargedMultiplicity() + R->neutralMultiplicity();
     I.cMulti      = R->chargedMultiplicity();
+    I.cMultiFrac  = R->chargedMultiplicity()/(R->chargedMultiplicity() + R->neutralMultiplicity());
     I.nMulti      = R->neutralMultiplicity();
+    I.nMultiFrac  = R->neutralMultiplicity()/(R->chargedMultiplicity() + R->neutralMultiplicity());
     I.partonFlavour     = R->partonFlavour();
     I.hadronFlavour     = R->hadronFlavour();
     I.mother = 0;
@@ -92,17 +100,25 @@ void ObjectsFormat::ResetJetType(JetType& I) {
     I.cmuEFrac      = -1.;
     I.muE           = -1.;
     I.muEFrac       = -1.;
+    I.muMulti       = -1.;
+    I.muMultiFrac   = -1.;
     I.eleE          = -1.;
     I.eleEFrac      = -1.;
     I.eleMulti      = -1.;
+    I.eleMultiFrac   = -1.;
     I.photonE       = -1.;
     I.photonEFrac   = -1.;
     I.photonMulti   = -1.;
+    I.photonMultiFrac   = -1.;
     I.cHadMulti     = -1.;
+    I.cHadMultiFrac = -1.;
     I.nHadMulti     = -1.;
+    I.nHadMultiFrac = -1.;
     I.npr           = -1.;
     I.cMulti        = -1.;
+    I.cMultiFrac    = -1.;
     I.nMulti        = -1.;
+    I.nMultiFrac    = -1.;
     I.hasGenJ       =false;
     I.ptGenJ      = -10.;
     I.etaGenJ     = -4.;
@@ -135,4 +151,4 @@ void ObjectsFormat::ResetJetType(JetType& I) {
     I.isTightLepVeto     = false;
 }
 
-std::string ObjectsFormat::ListJetType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:cHadE/F:nHadE/F:cHadEFrac/F:nHadEFrac/F:nEmE/F:nEmEFrac/F:cEmE/F:cEmEFrac/F:cmuE/F:cmuEFrac/F:muE/F:muEFrac/F:eleE/F:eleEFrac/F:eleMulti/F:photonE/F:photonEFrac/F:photonMulti/F:cHadMulti/F:nHadMulti/F:npr/F:cMulti/F:nMulti/F:hasGenJ/O:ptGenJ/F:etaGenJ/F:phiGenJ/F:massGenJ/F:dRGenJ/F:response/F:multiGen/F:nMultiGen/F:cMultiGen/F:cHadEGen/F:nHadEGen/F:emEGen/F:eleEGen/F:photonEGen/F:ptGen/F:etaGen/F:phiGen/F:massGen/F:pdgIdGen/I:partonFlavour/I:hadronFlavour/I:mother/I:GenRecoMulti/F:GenRecoChMulti/F:GenRecoNeuMulti/F:isLoose/O:isMedium/O:isTight/O:isTightLepVeto/O";}
+std::string ObjectsFormat::ListJetType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:cHadE/F:nHadE/F:cHadEFrac/F:nHadEFrac/F:nEmE/F:nEmEFrac/F:cEmE/F:cEmEFrac/F:cmuE/F:cmuEFrac/F:muE/F:muEFrac/F:muMulti/F:muMultiFrac/F:eleE/F:eleEFrac/F:eleMulti/F:eleMultiFrac/F:photonE/F:photonEFrac/F:photonMulti/F:photonMultiFrac/F:cHadMulti/F:cHadMultiFrac/F:nHadMulti/F:nHadMultiFrac/F:npr/F:cMulti/F:cMultiFrac/F:nMulti/F:nMultiFrac/F:hasGenJ/O:ptGenJ/F:etaGenJ/F:phiGenJ/F:massGenJ/F:dRGenJ/F:response/F:multiGen/F:nMultiGen/F:cMultiGen/F:cHadEGen/F:nHadEGen/F:emEGen/F:eleEGen/F:photonEGen/F:ptGen/F:etaGen/F:phiGen/F:massGen/F:pdgIdGen/I:partonFlavour/I:hadronFlavour/I:mother/I:GenRecoMulti/F:GenRecoChMulti/F:GenRecoNeuMulti/F:isLoose/O:isMedium/O:isTight/O:isTightLepVeto/O";}
