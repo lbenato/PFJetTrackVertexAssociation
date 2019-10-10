@@ -105,21 +105,24 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   edm::EDGetTokenT< std::vector<PileupSummaryInfo> > pileupSummaryToken_;
   edm::EDGetTokenT< std::vector<reco::Vertex> > PVToken_;
   edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandToken_;
-  //edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandToken1_;
-  //edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandToken2_;
-  //edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandToken3_;
-  //edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandToken4_;
-  //edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandToken5_;
+  //edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandFakeRejectedToken_;
+  edm::EDGetTokenT<pat::JetCollection> jetToken0_;
   edm::EDGetTokenT<pat::JetCollection> jetToken1_;
   edm::EDGetTokenT<pat::JetCollection> jetToken2_;
   edm::EDGetTokenT<pat::JetCollection> jetToken3_;
   edm::EDGetTokenT<pat::JetCollection> jetToken4_;
   edm::EDGetTokenT<pat::JetCollection> jetToken5_;
-  edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken1_;
-  edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken2_;
-  edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken3_;
-  edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken4_;
-  edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken5_;
+  edm::EDGetTokenT<pat::JetCollection> jetToken6_;
+  edm::EDGetTokenT<pat::JetCollection> jetToken7_;
+  //For reco jets:
+  //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken0_;
+  //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken1_;
+  //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken2_;
+  //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken3_;
+  //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken4_;
+  //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken5_;
+  //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken6_;
+  //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken7_;
   edm::EDGetTokenT< std::vector<reco::GenJet> > GenJetToken_;
   edm::EDGetTokenT< double> rhoToken_;
   
@@ -145,24 +148,26 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   //float ptGenCHS3[njets_max],drGenCHS3[njets_max];
   //float drGenCHS4[njets_max], ptGenCHS4[njets_max];
 
-  long int nGenJets, nJetsNew1, nJetsNew2, nJetsNew3, nJetsNew4, nJetsNew5, nJets, nPUtrue, EventNumber, LumiNumber, RunNumber, nPV, nPVsel_ndof, nPVsel_pt;
+  long int nGenJets, nJetsNew0, nJetsNew1, nJetsNew2, nJetsNew3, nJetsNew4, nJetsNew5, nJetsNew6, nJetsNew7, nJets, nPUtrue, EventNumber, LumiNumber, RunNumber, nPV, nPVsel_ndof, nPVsel_pt;
   int nPFCandidates, nPFCandidatesTrack, nPFCandidatesHighPurityTrack;
-  //int nPFCandidatesNew1, nPFCandidatesHighPurityNew1;
-  //int nPFCandidatesNew2, nPFCandidatesHighPurityNew2;
-  //int nPFCandidatesNew3, nPFCandidatesHighPurityNew3;
-  //int nPFCandidatesNew4, nPFCandidatesHighPurityNew4;
-  //int nPFCandidatesNew5, nPFCandidatesHighPurityNew5;
+  //int nPFCandidatesFakeRejected, nPFCandidatesFakeRejectedTrack, nPFCandidatesFakeRejectedHighPurityTrack;
+  //std::vector<float> PFCand_dz, PFCand_cosh;
   float  rho;
   //int JetId;
   bool isVerbose, isMC;
 
   //Structures
+  //std::vector<PFCandidateType> PFCands;
+  //std::vector<PFCandidateType> PFCandsFakeRejected;
   std::vector<JetType> Jets;
+  std::vector<JetType> JetsNew0;
   std::vector<JetType> JetsNew1;
   std::vector<JetType> JetsNew2;
   std::vector<JetType> JetsNew3;
   std::vector<JetType> JetsNew4;
   std::vector<JetType> JetsNew5;
+  std::vector<JetType> JetsNew6;
+  std::vector<JetType> JetsNew7;
 
 };
 
@@ -184,16 +189,15 @@ Ntuplizer::Ntuplizer(const edm::ParameterSet& iConfig):
   pileupSummaryToken_(consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter <edm::InputTag>("pileup"))),
   PVToken_(consumes<std::vector<reco::Vertex>>(iConfig.getParameter <edm::InputTag>("vertices"))),
   PFCandToken_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidates"))),
-  //PFCandToken1_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidates1"))),
-  //PFCandToken2_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidates2"))),
-  //PFCandToken3_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidates3"))),
-  //PFCandToken4_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidates4"))),
-  //PFCandToken5_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidates5"))),
-  jetToken1_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets1"))),  
+  //PFCandFakeRejectedToken_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidatesfakerejected"))),
+  jetToken0_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets0"))), 
+  jetToken1_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets1"))),
   jetToken2_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets2"))),  
   jetToken3_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets3"))),  
   jetToken4_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets4"))),  
   jetToken5_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets5"))),  
+  jetToken6_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets6"))),  
+  jetToken7_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets7"))),  
   GenJetToken_(consumes<std::vector<reco::GenJet>>(iConfig.getParameter <edm::InputTag>("genjets"))),  
   rhoToken_(consumes<double>(iConfig.getParameter <edm::InputTag>("rhosrc"))),
   isVerbose(iConfig.getParameter<bool> ("verbose"))
@@ -202,11 +206,11 @@ Ntuplizer::Ntuplizer(const edm::ParameterSet& iConfig):
 
   //theJetAnalyzer      = new JetAnalyzer(JetPSet, consumesCollector());
   //jetToken_ = consumes<std::vector<pat::Jet>>(edm::InputTag("selectedPatJetsNew1CHS"));//("patJetsAK4PF","","USER"));//
-  newJetToken1_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew1CHS"));//("selectedPatJetsak4PFJetsNew1CHS"));//
-  newJetToken2_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew2CHS"));//("selectedPatJetsak4PFJetsNew2CHS"));//
-  newJetToken3_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew3CHS"));//("selectedPatJetsak4PFJetsNew3CHS"));//
-  newJetToken4_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew4CHS"));//("selectedPatJetsak4PFJetsNew4CHS"));//
-  newJetToken5_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew5CHS"));//("selectedPatJetsak4PFJetsNew4CHS"));//
+  //newJetToken1_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew1CHS"));//("selectedPatJetsak4PFJetsNew1CHS"));//
+  //newJetToken2_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew2CHS"));//("selectedPatJetsak4PFJetsNew2CHS"));//
+  //newJetToken3_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew3CHS"));//("selectedPatJetsak4PFJetsNew3CHS"));//
+  //newJetToken4_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew4CHS"));//("selectedPatJetsak4PFJetsNew4CHS"));//
+  //newJetToken5_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew5CHS"));//("selectedPatJetsak4PFJetsNew4CHS"));//
   //GenJetToken_ = consumes<std::vector<reco::GenJet> >(edm::InputTag("slimmedGenJets"));
   //now do what ever initialization is needed
   usesResource("TFileService");
@@ -241,13 +245,9 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   //Initialization
   EventNumber = LumiNumber = RunNumber = nPV = nPVsel_ndof = nPVsel_pt = 0;
-  nJets = nJetsNew1 = nJetsNew2 = nJetsNew3 = nJetsNew4 = nJetsNew5 = 0;
+  nJets = nJetsNew0 = nJetsNew1 = nJetsNew2 = nJetsNew3 = nJetsNew4 = nJetsNew5 = nJetsNew6 = nJetsNew7 = 0;
   nPFCandidates = nPFCandidatesTrack = nPFCandidatesHighPurityTrack = 0;
-  //nPFCandidatesNew1 = nPFCandidatesHighPurityNew1 = 0;
-  //nPFCandidatesNew2 = nPFCandidatesHighPurityNew2 = 0;
-  //nPFCandidatesNew3 = nPFCandidatesHighPurityNew3 = 0;
-  //nPFCandidatesNew4 = nPFCandidatesHighPurityNew4 = 0;
-  //nPFCandidatesNew5 = nPFCandidatesHighPurityNew5 = 0;
+  //nPFCandidatesFakeRejected = nPFCandidatesFakeRejectedTrack = nPFCandidatesFakeRejectedHighPurityTrack = 0;
   //JetId = 0;
   isMC = false;
 
@@ -270,16 +270,19 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   nPV = PVCollection->size();
 
   ////Count good vertices; thanks to Wolfram Erdmann, but works only over AOD
+  //int vertex_counter = 0;
   for(std::vector<reco::Vertex>::const_iterator it=PVCollection->begin(); it!=PVCollection->end(); ++it){
     reco::Vertex v=*it;
-    //option 0: usual ndof cut
+    //std::cout << "Vertex n." << vertex_counter << std::endl; 
+    //vertex_counter++;
+   //option 0: usual ndof cut
     if(select(v, 0)){
       nPVsel_ndof++;
     }
     //option 1: Wolfram's selection
-  //  if(select(v, 1)){
-  //    nPVsel_pt++;
-  //  }
+    if(select(v, 1)){
+      nPVsel_pt++;
+    }
   }
 
   //MET
@@ -369,6 +372,39 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   Jets.clear();
 
   Ntuplizer::GenJetAnalyzer(JetsVect);
+
+  ////**********////
+  //// JetsNew0 ////
+  ////**********////
+
+  edm::Handle<pat::JetCollection> PFJetsCollectionNew0;
+  iEvent.getByToken(jetToken0_,PFJetsCollectionNew0);
+
+  //Fill Jet vector
+  std::vector<pat::Jet> JetsVectNew0;
+  for(std::vector<pat::Jet>::const_iterator it=PFJetsCollectionNew0->begin(); it!=PFJetsCollectionNew0->end(); ++it) {
+    pat::Jet jet=*it;
+    //JetId not from pset!!!
+    //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
+    //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
+    //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
+    //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
+    jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
+    jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
+    jet.addUserFloat("nEmEFrac", jet.neutralEmEnergyFraction());
+    jet.addUserFloat("cEmEFrac", jet.chargedEmEnergyFraction());
+    jet.addUserFloat("cmuEFrac", jet.chargedMuEnergyFraction());
+    jet.addUserFloat("muEFrac", jet.muonEnergyFraction());
+    jet.addUserFloat("eleEFrac", jet.electronEnergyFraction());
+    jet.addUserFloat("photonEFrac", jet.photonEnergyFraction());
+    JetsVectNew0.push_back(jet);
+  }
+  nJetsNew0 = JetsVectNew0.size();
+  JetsNew0.clear();
+
+  Ntuplizer::GenJetAnalyzer(JetsVectNew0);
 
   ////**********////
   //// JetsNew1 ////
@@ -538,59 +574,105 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   Ntuplizer::GenJetAnalyzer(JetsVectNew5);
 
+
+  ////**********////
+  //// JetsNew6 ////
+  ////**********////
+
+  edm::Handle<pat::JetCollection> PFJetsCollectionNew6;
+  iEvent.getByToken(jetToken6_,PFJetsCollectionNew6);
+
+  //Fill Jet vector
+  std::vector<pat::Jet> JetsVectNew6;
+  for(std::vector<pat::Jet>::const_iterator it=PFJetsCollectionNew6->begin(); it!=PFJetsCollectionNew6->end(); ++it) {
+    pat::Jet jet=*it;
+    //JetId not from pset!!!
+    //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
+    //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
+    //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
+    //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
+    jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
+    jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
+    jet.addUserFloat("nEmEFrac", jet.neutralEmEnergyFraction());
+    jet.addUserFloat("cEmEFrac", jet.chargedEmEnergyFraction());
+    jet.addUserFloat("cmuEFrac", jet.chargedMuEnergyFraction());
+    jet.addUserFloat("muEFrac", jet.muonEnergyFraction());
+    jet.addUserFloat("eleEFrac", jet.electronEnergyFraction());
+    jet.addUserFloat("photonEFrac", jet.photonEnergyFraction());
+    JetsVectNew6.push_back(jet);
+  }
+  nJetsNew6 = JetsVectNew6.size();
+  JetsNew6.clear();
+
+  Ntuplizer::GenJetAnalyzer(JetsVectNew6);
+
+  ////**********////
+  //// JetsNew7 ////
+  ////**********////
+
+  edm::Handle<pat::JetCollection> PFJetsCollectionNew7;
+  iEvent.getByToken(jetToken7_,PFJetsCollectionNew7);
+
+  //Fill Jet vector
+  std::vector<pat::Jet> JetsVectNew7;
+  for(std::vector<pat::Jet>::const_iterator it=PFJetsCollectionNew7->begin(); it!=PFJetsCollectionNew7->end(); ++it) {
+    pat::Jet jet=*it;
+    //JetId not from pset!!!
+    //if(JetId==1 && !theJetAnalyzer->isLooseJet(jet)) continue;
+    //if(JetId==2 && !theJetAnalyzer->isTightJet(jet)) continue;
+    //if(JetId==3 && !theJetAnalyzer->isTightLepVetoJet(jet)) continue;
+    jet.addUserInt("isLoose", Ntuplizer::isLooseJet(jet) ? 1 : 0);
+    jet.addUserInt("isTight", Ntuplizer::isTightJet(jet) ? 1 : 0);
+    //jet.addUserInt("isTightLepVeto", theJetAnalyzer->isTightLepVetoJet(jet) ? 1 : 0);
+    jet.addUserFloat("cHadEFrac", jet.chargedHadronEnergyFraction());
+    jet.addUserFloat("nHadEFrac", jet.neutralHadronEnergyFraction());
+    jet.addUserFloat("nEmEFrac", jet.neutralEmEnergyFraction());
+    jet.addUserFloat("cEmEFrac", jet.chargedEmEnergyFraction());
+    jet.addUserFloat("cmuEFrac", jet.chargedMuEnergyFraction());
+    jet.addUserFloat("muEFrac", jet.muonEnergyFraction());
+    jet.addUserFloat("eleEFrac", jet.electronEnergyFraction());
+    jet.addUserFloat("photonEFrac", jet.photonEnergyFraction());
+    JetsVectNew7.push_back(jet);
+  }
+  nJetsNew7 = JetsVectNew7.size();
+  JetsNew7.clear();
+
+  Ntuplizer::GenJetAnalyzer(JetsVectNew7);
+
+
   ////**************////
   ////PF candidates////
   ////**************////
 
   edm::Handle<pat::PackedCandidateCollection> PFCandCollection;
   iEvent.getByToken(PFCandToken_, PFCandCollection);
+
+  //std::vector<pat::PackedCandidate> PFCandsVect;
+
   for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandCollection->begin(); it!=PFCandCollection->end(); ++it) {
     pat::PackedCandidate pfcand=*it;
     nPFCandidates++;
+    //PFCandsVect.push_back(pfcand);
     if(pfcand.charge()!=0) nPFCandidatesTrack++;
     if(pfcand.trackHighPurity()) nPFCandidatesHighPurityTrack++;
   }
-  /*
-  edm::Handle<pat::PackedCandidateCollection> PFCandCollectionNew1;
-  iEvent.getByToken(PFCandToken1_, PFCandCollectionNew1);
-  for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandCollectionNew1->begin(); it!=PFCandCollectionNew1->end(); ++it) {
-    pat::PackedCandidate pfcandNew1=*it;
-    nPFCandidatesNew1++;
-    if(pfcandNew1.trackHighPurity()) nPFCandidatesHighPurityNew1++;
-  }
+  //PFCands.clear();
 
-  edm::Handle<pat::PackedCandidateCollection> PFCandCollectionNew2;
-  iEvent.getByToken(PFCandToken2_, PFCandCollectionNew2);
-  for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandCollectionNew2->begin(); it!=PFCandCollectionNew2->end(); ++it) {
-    pat::PackedCandidate pfcandNew2=*it;
-    nPFCandidatesNew2++;
-    if(pfcandNew2.trackHighPurity()) nPFCandidatesHighPurityNew2++;
-  }
+  //edm::Handle<pat::PackedCandidateCollection> PFCandFakeRejectedCollection;
+  //iEvent.getByToken(PFCandFakeRejectedToken_, PFCandFakeRejectedCollection);
 
-  edm::Handle<pat::PackedCandidateCollection> PFCandCollectionNew3;
-  iEvent.getByToken(PFCandToken3_, PFCandCollectionNew3);
-  for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandCollectionNew3->begin(); it!=PFCandCollectionNew3->end(); ++it) {
-    pat::PackedCandidate pfcandNew3=*it;
-    nPFCandidatesNew3++;
-    if(pfcandNew3.trackHighPurity()) nPFCandidatesHighPurityNew3++;
-  }
+  //std::vector<pat::PackedCandidate> PFCandsFakeRejectedVect;
 
-  edm::Handle<pat::PackedCandidateCollection> PFCandCollectionNew4;
-  iEvent.getByToken(PFCandToken4_, PFCandCollectionNew4);
-  for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandCollectionNew4->begin(); it!=PFCandCollectionNew4->end(); ++it) {
-    pat::PackedCandidate pfcandNew4=*it;
-    nPFCandidatesNew4++;
-    if(pfcandNew4.trackHighPurity()) nPFCandidatesHighPurityNew4++;
-  }
-
-  edm::Handle<pat::PackedCandidateCollection> PFCandCollectionNew5;
-  iEvent.getByToken(PFCandToken5_, PFCandCollectionNew5);
-  for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandCollectionNew5->begin(); it!=PFCandCollectionNew5->end(); ++it) {
-    pat::PackedCandidate pfcandNew5=*it;
-    nPFCandidatesNew5++;
-    if(pfcandNew5.trackHighPurity()) nPFCandidatesHighPurityNew5++;
-  }
-  */
+  //for(std::vector<pat::PackedCandidate>::const_iterator it=PFCandFakeRejectedCollection->begin(); it!=PFCandFakeRejectedCollection->end(); ++it) {
+  //pat::PackedCandidate pfcandFakeRejected=*it;
+  //nPFCandidatesFakeRejected++;
+  //PFCandsFakeRejectedVect.push_back(pfcandFakeRejected);
+  //if(pfcandFakeRejected.charge()!=0) nPFCandidatesFakeRejectedTrack++;
+  //if(pfcandFakeRejected.trackHighPurity()) nPFCandidatesFakeRejectedHighPurityTrack++;
+  //}
+  //PFCandsFakeRejected.clear();
 
   edm::Handle<std::vector<reco::GenJet> > GenJetsCollection;
   iEvent.getByToken(GenJetToken_,GenJetsCollection);
@@ -611,27 +693,40 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     std::cout << " --- Event n. " << iEvent.id().event() << ", lumi " << iEvent.luminosityBlock() << ", run " << iEvent.id().run() << std::endl;
     for(unsigned int i = 0; i < GenJetsVect.size(); i++) std::cout << "  Gen AK4 jet  [" << i << "]\tpt: " << GenJetsVect[i].pt() << "\teta: " << GenJetsVect[i].eta() << "\tphi: " << GenJetsVect[i].phi() << "\tmass: " << GenJetsVect[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVect.size(); i++) std::cout << "  CHS AK4 jet  [" << i << "]\tpt: " << JetsVect[i].pt() << "\teta: " << JetsVect[i].eta() << "\tphi: " << JetsVect[i].phi() << "\tmass: " << JetsVect[i].mass() << std::endl;
+    for(unsigned int i = 0; i < JetsVectNew0.size(); i++) std::cout << "  CHS AK4 New0 jet  [" << i << "]\tpt: " << JetsVectNew0[i].pt() << "\teta: " << JetsVectNew0[i].eta() << "\tphi: " << JetsVectNew0[i].phi() << "\tmass: " << JetsVectNew0[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew1.size(); i++) std::cout << "  CHS AK4 New1 jet  [" << i << "]\tpt: " << JetsVectNew1[i].pt() << "\teta: " << JetsVectNew1[i].eta() << "\tphi: " << JetsVectNew1[i].phi() << "\tmass: " << JetsVectNew1[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew2.size(); i++) std::cout << "  CHS AK4 New2 jet  [" << i << "]\tpt: " << JetsVectNew2[i].pt() << "\teta: " << JetsVectNew2[i].eta() << "\tphi: " << JetsVectNew2[i].phi() << "\tmass: " << JetsVectNew2[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew3.size(); i++) std::cout << "  CHS AK4 New3 jet  [" << i << "]\tpt: " << JetsVectNew3[i].pt() << "\teta: " << JetsVectNew3[i].eta() << "\tphi: " << JetsVectNew3[i].phi() << "\tmass: " << JetsVectNew3[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew4.size(); i++) std::cout << "  CHS AK4 New4 jet  [" << i << "]\tpt: " << JetsVectNew4[i].pt() << "\teta: " << JetsVectNew4[i].eta() << "\tphi: " << JetsVectNew4[i].phi() << "\tmass: " << JetsVectNew4[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew5.size(); i++) std::cout << "  CHS AK4 New5 jet  [" << i << "]\tpt: " << JetsVectNew5[i].pt() << "\teta: " << JetsVectNew5[i].eta() << "\tphi: " << JetsVectNew5[i].phi() << "\tmass: " << JetsVectNew5[i].mass() << std::endl;
+    for(unsigned int i = 0; i < JetsVectNew6.size(); i++) std::cout << "  CHS AK4 New6 jet  [" << i << "]\tpt: " << JetsVectNew6[i].pt() << "\teta: " << JetsVectNew6[i].eta() << "\tphi: " << JetsVectNew6[i].phi() << "\tmass: " << JetsVectNew6[i].mass() << std::endl;
+    for(unsigned int i = 0; i < JetsVectNew7.size(); i++) std::cout << "  CHS AK4 New7 jet  [" << i << "]\tpt: " << JetsVectNew7[i].pt() << "\teta: " << JetsVectNew7[i].eta() << "\tphi: " << JetsVectNew7[i].phi() << "\tmass: " << JetsVectNew7[i].mass() << std::endl;
+
   }
 
+  //for(unsigned int i = 0; i < PFCandsVect.size(); i++) PFCands.push_back( PFCandidateType() );
+  //for(unsigned int i = 0; i < PFCandsFakeRejectedVect.size(); i++) PFCandsFakeRejected.push_back( PFCandidateType() );
   for(unsigned int i = 0; i < JetsVect.size(); i++) Jets.push_back( JetType() );
+  for(unsigned int i = 0; i < JetsVectNew0.size(); i++) JetsNew0.push_back( JetType() );
   for(unsigned int i = 0; i < JetsVectNew1.size(); i++) JetsNew1.push_back( JetType() );
   for(unsigned int i = 0; i < JetsVectNew2.size(); i++) JetsNew2.push_back( JetType() );
   for(unsigned int i = 0; i < JetsVectNew3.size(); i++) JetsNew3.push_back( JetType() );
   for(unsigned int i = 0; i < JetsVectNew4.size(); i++) JetsNew4.push_back( JetType() );
   for(unsigned int i = 0; i < JetsVectNew5.size(); i++) JetsNew5.push_back( JetType() );
+  for(unsigned int i = 0; i < JetsVectNew6.size(); i++) JetsNew6.push_back( JetType() );
+  for(unsigned int i = 0; i < JetsVectNew7.size(); i++) JetsNew7.push_back( JetType() );
 
+  //for(unsigned int i = 0; i < PFCandsVect.size(); i++) ObjectsFormat::FillPFCandidateType(PFCands[i], &PFCandsVect[i], isMC);
+  //for(unsigned int i = 0; i < PFCandsFakeRejectedVect.size(); i++) ObjectsFormat::FillPFCandidateType(PFCandsFakeRejected[i], &PFCandsFakeRejectedVect[i], isMC);
   for(unsigned int i = 0; i < JetsVect.size(); i++) ObjectsFormat::FillJetType(Jets[i], &JetsVect[i], isMC);
+  for(unsigned int i = 0; i < JetsVectNew0.size(); i++) ObjectsFormat::FillJetType(JetsNew0[i], &JetsVectNew0[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew1.size(); i++) ObjectsFormat::FillJetType(JetsNew1[i], &JetsVectNew1[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew2.size(); i++) ObjectsFormat::FillJetType(JetsNew2[i], &JetsVectNew2[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew3.size(); i++) ObjectsFormat::FillJetType(JetsNew3[i], &JetsVectNew3[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew4.size(); i++) ObjectsFormat::FillJetType(JetsNew4[i], &JetsVectNew4[i], isMC);
   for(unsigned int i = 0; i < JetsVectNew5.size(); i++) ObjectsFormat::FillJetType(JetsNew5[i], &JetsVectNew5[i], isMC);
-
+  for(unsigned int i = 0; i < JetsVectNew6.size(); i++) ObjectsFormat::FillJetType(JetsNew6[i], &JetsVectNew6[i], isMC);
+  for(unsigned int i = 0; i < JetsVectNew7.size(); i++) ObjectsFormat::FillJetType(JetsNew7[i], &JetsVectNew7[i], isMC);
 
 
 
@@ -661,41 +756,44 @@ Ntuplizer::beginJob()
   tree=fs->make<TTree>("tree","tree");
   tree->Branch("isMC" , &isMC, "isMC/O");
   tree->Branch("nJets",&nJets,"nJets/I");
+  tree->Branch("nJetsNew0",&nJetsNew0,"nJetsNew0/I");
   tree->Branch("nJetsNew1",&nJetsNew1,"nJetsNew1/I");
   tree->Branch("nJetsNew2",&nJetsNew2,"nJetsNew2/I");
   tree->Branch("nJetsNew3",&nJetsNew3,"nJetsNew3/I");
   tree->Branch("nJetsNew4",&nJetsNew4,"nJetsNew4/I");
   tree->Branch("nJetsNew5",&nJetsNew5,"nJetsNew5/I");
+  tree->Branch("nJetsNew6",&nJetsNew6,"nJetsNew6/I");
+  tree->Branch("nJetsNew7",&nJetsNew7,"nJetsNew7/I");
   tree->Branch("nGenJets",&nGenJets,"nGenJets/I");
   
   tree-> Branch("nPUtrue",&nPUtrue,"nPUtrue/I");
   tree-> Branch("nPV",&nPV,"nPV/I");
   tree-> Branch("nPVsel_ndof",&nPVsel_ndof,"nPVsel_ndof/I");
-  //tree-> Branch("nPVsel_pt",&nPVsel_pt,"nPVsel_pt/I");
+  tree-> Branch("nPVsel_pt",&nPVsel_pt,"nPVsel_pt/I");
   tree-> Branch("RunNumber",&RunNumber,"RunNumber/I");
   tree-> Branch("LumiNumber",&LumiNumber,"LumiNumber/I");
   tree-> Branch("EventNumber",&EventNumber,"EventNumber/I");
   tree-> Branch("rho",&rho,"rho/F");
 
   tree -> Branch("Jets", &Jets);
+  tree -> Branch("JetsNew0", &JetsNew0);
   tree -> Branch("JetsNew1", &JetsNew1);
   tree -> Branch("JetsNew2", &JetsNew2);
   tree -> Branch("JetsNew3", &JetsNew3);
   tree -> Branch("JetsNew4", &JetsNew4);
   tree -> Branch("JetsNew5", &JetsNew5);
+  tree -> Branch("JetsNew6", &JetsNew6);
+  tree -> Branch("JetsNew7", &JetsNew7);
   tree -> Branch("nPFCandidates" , &nPFCandidates, "nPFCandidates/I");
   tree -> Branch("nPFCandidatesTrack", &nPFCandidatesTrack, "nPFCandidatesTrack/I");
   tree -> Branch("nPFCandidatesHighPurityTrack", &nPFCandidatesHighPurityTrack, "nPFCandidatesHighPurityTrack/I");
-  //tree -> Branch("nPFCandidatesNew1" , &nPFCandidatesNew1, "nPFCandidatesNew1/I");
-  //tree -> Branch("nPFCandidatesHighPurityNew1", &nPFCandidatesHighPurityNew1, "nPFCandidatesHighPurityNew1/I");
-  //tree -> Branch("nPFCandidatesNew2" , &nPFCandidatesNew2, "nPFCandidatesNew2/I");
-  //tree -> Branch("nPFCandidatesHighPurityNew2", &nPFCandidatesHighPurityNew2, "nPFCandidatesHighPurityNew2/I");
-  //tree -> Branch("nPFCandidatesNew3" , &nPFCandidatesNew3, "nPFCandidatesNew3/I");
-  //tree -> Branch("nPFCandidatesHighPurityNew3", &nPFCandidatesHighPurityNew3, "nPFCandidatesHighPurityNew3/I");
-  //tree -> Branch("nPFCandidatesNew4" , &nPFCandidatesNew4, "nPFCandidatesNew4/I");
-  //tree -> Branch("nPFCandidatesHighPurityNew4", &nPFCandidatesHighPurityNew4, "nPFCandidatesHighPurityNew4/I");
-  //tree -> Branch("nPFCandidatesNew5" , &nPFCandidatesNew5, "nPFCandidatesNew5/I");
-  //tree -> Branch("nPFCandidatesHighPurityNew5", &nPFCandidatesHighPurityNew5, "nPFCandidatesHighPurityNew5/I");
+  //tree -> Branch("PFCands", &PFCands);
+
+  //tree -> Branch("nPFCandidatesFakeRejected" , &nPFCandidatesFakeRejected, "nPFCandidatesFakeRejected/I");
+  //tree -> Branch("nPFCandidatesFakeRejectedTrack", &nPFCandidatesFakeRejectedTrack, "nPFCandidatesFakeRejectedTrack/I");
+  //tree -> Branch("nPFCandidatesFakeRejectedHighPurityTrack", &nPFCandidatesFakeRejectedHighPurityTrack, "nPFCandidatesFakeRejectedHighPurityTrack/I");
+  //tree -> Branch("PFCandsFakeRejected", &PFCandsFakeRejected);
+
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
@@ -862,8 +960,8 @@ bool Ntuplizer::select(const reco::Vertex & v, int level){
   */
   //std::cout << Ntuplizer::vertex_ptmax2(v) << std::endl;
   if( v.isFake() ) return false;
-  if( (level == 0) && (v.ndof()>4) )return true;
-  if( (level == 1) && (v.ndof()>4) && (Ntuplizer::vertex_ptmax2(v)>0.4) )return true;
+  if( (level == 0) && (v.ndof()>4) ) return true;
+  if( (level == 1) && (v.ndof()>4) && (Ntuplizer::vertex_ptmax2(v)>0.4) ) return true;
   return false;
 } 
 
