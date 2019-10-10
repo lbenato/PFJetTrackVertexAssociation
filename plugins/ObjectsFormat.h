@@ -29,6 +29,9 @@ class ObjectsFormat {
         static void FillJetType(JetType&, const pat::Jet*, bool);
         static void ResetJetType(JetType&);
         static std::string ListJetType();
+        static void FillPFCandidateType(PFCandidateType&, const pat::PackedCandidate*, bool);
+        static void ResetPFCandidateType(PFCandidateType&);
+        static std::string ListPFCandidateType();
         
     private:
     

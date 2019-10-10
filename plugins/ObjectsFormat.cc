@@ -120,10 +120,10 @@ void ObjectsFormat::ResetJetType(JetType& I) {
     I.nMulti        = -1.;
     I.nMultiFrac    = -1.;
     I.hasGenJ       =false;
-    I.ptGenJ      = -10.;
-    I.etaGenJ     = -4.;
-    I.phiGenJ     = -4.;
-    I.massGenJ    = -10.;
+    I.ptGenJ      = -1.;
+    I.etaGenJ     = -9.;
+    I.phiGenJ     = -9.;
+    I.massGenJ    = -1.;
     I.dRGenJ      = 999.;
     I.response    = -1.;
     I.multiGen    = -1.;
@@ -152,3 +152,37 @@ void ObjectsFormat::ResetJetType(JetType& I) {
 }
 
 std::string ObjectsFormat::ListJetType() {return "pt/F:eta/F:phi/F:mass/F:energy/F:cHadE/F:nHadE/F:cHadEFrac/F:nHadEFrac/F:nEmE/F:nEmEFrac/F:cEmE/F:cEmEFrac/F:cmuE/F:cmuEFrac/F:muE/F:muEFrac/F:muMulti/F:muMultiFrac/F:eleE/F:eleEFrac/F:eleMulti/F:eleMultiFrac/F:photonE/F:photonEFrac/F:photonMulti/F:photonMultiFrac/F:cHadMulti/F:cHadMultiFrac/F:nHadMulti/F:nHadMultiFrac/F:npr/F:cMulti/F:cMultiFrac/F:nMulti/F:nMultiFrac/F:hasGenJ/O:ptGenJ/F:etaGenJ/F:phiGenJ/F:massGenJ/F:dRGenJ/F:response/F:multiGen/F:nMultiGen/F:cMultiGen/F:cHadEGen/F:nHadEGen/F:emEGen/F:eleEGen/F:photonEGen/F:ptGen/F:etaGen/F:phiGen/F:massGen/F:pdgIdGen/I:partonFlavour/I:hadronFlavour/I:mother/I:GenRecoMulti/F:GenRecoChMulti/F:GenRecoNeuMulti/F:isLoose/O:isMedium/O:isTight/O:isTightLepVeto/O";}
+
+
+//*******************//
+//    PF Candidates  //
+//*******************//
+
+void ObjectsFormat::FillPFCandidateType(PFCandidateType& I, const pat::PackedCandidate* R, bool isMC) {
+    if(!R) return;
+    I.pt          = R->pt();
+    I.eta         = R->eta();
+    I.phi         = R->phi();
+    I.dz          = abs(R->dz());
+    I.cosh        = cosh(R->eta())*(0.02+0.01/R->pt())*5;
+    I.isNew1      = abs(R->dz())<cosh(R->eta())*(0.02+0.01/R->pt())*5 ? true : false;
+    I.isCHS       = (R->fromPV()>0 || R->charge()==0) ? true : false;
+    I.isNew3      = (abs(R->dz()) < cosh(R->eta())*(0.02+0.01/R->pt())*5) ||  (R->hasTrackDetails() && abs(R->dz())<R->pt()*R->dzError()) ? true : false;
+    I.isNew4      = (R->vertexRef().key()==0 ||( R->dzAssociatedPV() < cosh(R->eta() )*(0.003+0.01/R->pt())*5) || R->charge()==0) ? true : false;
+    I.isPuppi     = (R->fromPV()==3 || ( (R->fromPV()==2 || R->fromPV()==1) && abs(R->dz()) < 0.3 )) ? true : false;
+}
+
+void ObjectsFormat::ResetPFCandidateType(PFCandidateType& I) {
+    I.pt          = -1.;
+    I.eta         = -9.;
+    I.phi         = -9.;
+    I.dz          = -9.;
+    I.cosh        = -9.;
+    I.isNew1      = false;
+    I.isCHS       = false;
+    I.isNew3      = false;
+    I.isNew4      = false;
+    I.isPuppi     = false;
+}
+
+std::string ObjectsFormat::ListPFCandidateType() {return "pt/F:eta/F:phi/F:dz/F:cosh/F:isNew1/O:isCHS/O:isNew3/O:isNew4/O:isPuppi/O";}
