@@ -1,5 +1,7 @@
 
 <lcgdict>
   <class name="JetType"/>
+  <class name="PFCandidateType"/>
   <class name="std::vector<JetType>"/>
+  <class name="std::vector<PFCandidateType>"/>
 </lcgdict>
