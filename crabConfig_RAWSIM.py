@@ -12,7 +12,7 @@ config.Data.inputDataset = '/QCD_Pt_600to800_TuneCP5_13TeV_pythia8/RunIIFall17GS
 config.Data.inputDBS = 'global'#'phys03'
 
 config.JobType.psetName = 'step_RAWSIM_cfg.py'
-config.JobType.maxMemoryMB = 15900 #(alzare la memoria)
+config.JobType.maxMemoryMB = 15900 #(more memory)
 config.JobType.numCores = 8
 
 config.Data.splitting = 'Automatic'

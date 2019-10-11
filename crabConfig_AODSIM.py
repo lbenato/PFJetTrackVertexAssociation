@@ -12,7 +12,7 @@ config.Data.inputDataset = '/QCD_Pt_600to800_TuneCP5_13TeV_pythia8/lbenato-QCD_P
 config.Data.inputDBS = 'phys03'
 
 config.JobType.psetName = 'step_AODSIM_generalTracks_cfg.py'
-config.JobType.maxMemoryMB = 15900 #(alzare la memoria)
+config.JobType.maxMemoryMB = 15900 #(more memory)
 config.JobType.numCores = 8
 
 config.Data.splitting = 'Automatic'
