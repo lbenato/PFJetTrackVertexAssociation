@@ -39,6 +39,11 @@
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+
 #include "DataFormats/Candidate/interface/CompositePtrCandidate.h"
 
 #include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
@@ -102,7 +107,7 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   //edm::ParameterSet JetPSet;
   edm::EDGetTokenT<pat::JetCollection> jetToken_;
   double jetpt;
-  edm::EDGetTokenT< std::vector<PileupSummaryInfo> > pileupSummaryToken_;
+  //edm::EDGetTokenT< std::vector<PileupSummaryInfo> > pileupSummaryToken_;
   edm::EDGetTokenT< std::vector<reco::Vertex> > PVToken_;
   edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandToken_;
   //edm::EDGetTokenT< std::vector<pat::PackedCandidate> > PFCandFakeRejectedToken_;
@@ -124,6 +129,9 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken6_;
   //edm::EDGetTokenT< std::vector<reco::PFJet> > newJetToken7_;
   edm::EDGetTokenT< std::vector<reco::GenJet> > GenJetToken_;
+  edm::EDGetTokenT<edm::TriggerResults> TriggerToken_;
+  std::vector<std::string> TriggerList_;
+  bool WriteOnlyTriggerEvents_;
   edm::EDGetTokenT< double> rhoToken_;
   
   //
@@ -154,7 +162,9 @@ class Ntuplizer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   //std::vector<float> PFCand_dz, PFCand_cosh;
   float  rho;
   //int JetId;
-  bool isVerbose, isMC;
+  bool isVerbose, isMC, AtLeastOneTrigger;
+  //trigger
+  std::map<std::string, bool> TriggerMap;
 
   //Structures
   //std::vector<PFCandidateType> PFCands;
@@ -186,7 +196,7 @@ Ntuplizer::Ntuplizer(const edm::ParameterSet& iConfig):
   //JetPSet(iConfig.getParameter<edm::ParameterSet>("jetSet")),
   jetToken_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets"))),  
   jetpt(iConfig.getParameter <double>("jetpt")),  
-  pileupSummaryToken_(consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter <edm::InputTag>("pileup"))),
+  //pileupSummaryToken_(consumes<std::vector<PileupSummaryInfo>>(iConfig.getParameter <edm::InputTag>("pileup"))),
   PVToken_(consumes<std::vector<reco::Vertex>>(iConfig.getParameter <edm::InputTag>("vertices"))),
   PFCandToken_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidates"))),
   //PFCandFakeRejectedToken_(consumes<std::vector<pat::PackedCandidate>>(iConfig.getParameter <edm::InputTag>("pfcandidatesfakerejected"))),
@@ -199,11 +209,15 @@ Ntuplizer::Ntuplizer(const edm::ParameterSet& iConfig):
   jetToken6_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets6"))),  
   jetToken7_(consumes<std::vector<pat::Jet>>(iConfig.getParameter <edm::InputTag>("jets7"))),  
   GenJetToken_(consumes<std::vector<reco::GenJet>>(iConfig.getParameter <edm::InputTag>("genjets"))),  
+  TriggerToken_(consumes<edm::TriggerResults>(iConfig.getParameter <edm::InputTag>("trigger"))),  
+  TriggerList_(iConfig.getParameter<std::vector<std::string> >("paths")),
+  WriteOnlyTriggerEvents_(iConfig.getParameter<bool>("writeOnlyTriggerEvents")),
   rhoToken_(consumes<double>(iConfig.getParameter <edm::InputTag>("rhosrc"))),
   isVerbose(iConfig.getParameter<bool> ("verbose"))
 
 {
 
+  for(unsigned int i = 0; i < TriggerList_.size(); i++) TriggerMap[ TriggerList_[i] ] = false;
   //theJetAnalyzer      = new JetAnalyzer(JetPSet, consumesCollector());
   //jetToken_ = consumes<std::vector<pat::Jet>>(edm::InputTag("selectedPatJetsNew1CHS"));//("patJetsAK4PF","","USER"));//
   //newJetToken1_ = consumes<std::vector<reco::PFJet> >(edm::InputTag("ak4PFJetsNew1CHS"));//("selectedPatJetsak4PFJetsNew1CHS"));//
@@ -244,12 +258,12 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   using namespace pat;
 
   //Initialization
-  EventNumber = LumiNumber = RunNumber = nPV = nPVsel_ndof = nPVsel_pt = 0;
+  EventNumber = LumiNumber = RunNumber = nPV = nPVsel_ndof = nPVsel_pt = nPUtrue = 0;
   nJets = nJetsNew0 = nJetsNew1 = nJetsNew2 = nJetsNew3 = nJetsNew4 = nJetsNew5 = nJetsNew6 = nJetsNew7 = 0;
   nPFCandidates = nPFCandidatesTrack = nPFCandidatesHighPurityTrack = 0;
   //nPFCandidatesFakeRejected = nPFCandidatesFakeRejectedTrack = nPFCandidatesFakeRejectedHighPurityTrack = 0;
   //JetId = 0;
-  isMC = false;
+  isMC = AtLeastOneTrigger = false;
 
   float PtTh(jetpt);
 
@@ -260,14 +274,44 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   RunNumber=iEvent.id().run();
   
   //Pile up info
-  edm::Handle<std::vector<PileupSummaryInfo> > PupInfo;
-  iEvent.getByToken(pileupSummaryToken_,PupInfo);
-  nPUtrue = PupInfo -> begin()->getTrueNumInteractions();
+  //edm::Handle<std::vector<PileupSummaryInfo> > PupInfo;
+  //iEvent.getByToken(pileupSummaryToken_,PupInfo);
+  //nPUtrue = PupInfo -> begin()->getTrueNumInteractions();
 
   //Alternative way
   edm::Handle<reco::VertexCollection> PVCollection;
   iEvent.getByToken(PVToken_, PVCollection);
   nPV = PVCollection->size();
+
+  //Trigger
+  edm::Handle<edm::TriggerResults> hltTriggerResults;
+  iEvent.getByToken(TriggerToken_, hltTriggerResults);
+
+  // Get Trigger index
+  for(unsigned int i = 0; i < TriggerList_.size(); i++) {
+    TriggerMap[TriggerList_[i]] = false;
+    if( !hltTriggerResults.failedToGet() ) {
+      const edm::TriggerNames& trigNames = iEvent.triggerNames(*hltTriggerResults);
+      for(unsigned int j=0, in=trigNames.size(); j < in; j++) {
+	if(trigNames.triggerName(j).find(TriggerList_[i]) != std::string::npos) {
+	  unsigned int index = trigNames.triggerIndex(trigNames.triggerName(j));
+	  if(hltTriggerResults->accept(index)) TriggerMap[TriggerList_[i]] = true;
+	}
+      }
+    }
+  }
+    
+
+  for(auto it = TriggerMap.begin(); it != TriggerMap.end(); it++)
+    {
+      if(it->second)
+	{
+	  //std::cout << " fired!!! " << std::endl;
+	  AtLeastOneTrigger = true;
+	}
+    }
+
+  if(!AtLeastOneTrigger && WriteOnlyTriggerEvents_) return;
 
   ////Count good vertices; thanks to Wolfram Erdmann, but works only over AOD
   //int vertex_counter = 0;
@@ -674,24 +718,28 @@ Ntuplizer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   //}
   //PFCandsFakeRejected.clear();
 
-  edm::Handle<std::vector<reco::GenJet> > GenJetsCollection;
-  iEvent.getByToken(GenJetToken_,GenJetsCollection);
 
-  //Fill Jet vector
-  //manually; otherwise we always need mutiple psets
-  std::vector<reco::GenJet> GenJetsVect;
-  for(std::vector<reco::GenJet>::const_iterator it=GenJetsCollection->begin(); it!=GenJetsCollection->end(); ++it) {
-    reco::GenJet jet=*it;
-    if(jet.pt()<PtTh) continue;
-    GenJetsVect.push_back(jet);
-  }
-  nGenJets = GenJetsVect.size();
-  //Jets.clear();
+  if(isMC)
+    {
+      edm::Handle<std::vector<reco::GenJet> > GenJetsCollection;
+      iEvent.getByToken(GenJetToken_,GenJetsCollection);
 
+      //Fill Jet vector
+      //manually; otherwise we always need mutiple psets
+      std::vector<reco::GenJet> GenJetsVect;
+      for(std::vector<reco::GenJet>::const_iterator it=GenJetsCollection->begin(); it!=GenJetsCollection->end(); ++it) {
+	reco::GenJet jet=*it;
+	if(jet.pt()<PtTh) continue;
+	GenJetsVect.push_back(jet);
+      }
+      nGenJets = GenJetsVect.size();
+      //Jets.clear();
+      
+    }
 
   if(isVerbose) {
     std::cout << " --- Event n. " << iEvent.id().event() << ", lumi " << iEvent.luminosityBlock() << ", run " << iEvent.id().run() << std::endl;
-    for(unsigned int i = 0; i < GenJetsVect.size(); i++) std::cout << "  Gen AK4 jet  [" << i << "]\tpt: " << GenJetsVect[i].pt() << "\teta: " << GenJetsVect[i].eta() << "\tphi: " << GenJetsVect[i].phi() << "\tmass: " << GenJetsVect[i].mass() << std::endl;
+    //for(unsigned int i = 0; i < GenJetsVect.size(); i++) std::cout << "  Gen AK4 jet  [" << i << "]\tpt: " << GenJetsVect[i].pt() << "\teta: " << GenJetsVect[i].eta() << "\tphi: " << GenJetsVect[i].phi() << "\tmass: " << GenJetsVect[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVect.size(); i++) std::cout << "  CHS AK4 jet  [" << i << "]\tpt: " << JetsVect[i].pt() << "\teta: " << JetsVect[i].eta() << "\tphi: " << JetsVect[i].phi() << "\tmass: " << JetsVect[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew0.size(); i++) std::cout << "  CHS AK4 New0 jet  [" << i << "]\tpt: " << JetsVectNew0[i].pt() << "\teta: " << JetsVectNew0[i].eta() << "\tphi: " << JetsVectNew0[i].phi() << "\tmass: " << JetsVectNew0[i].mass() << std::endl;
     for(unsigned int i = 0; i < JetsVectNew1.size(); i++) std::cout << "  CHS AK4 New1 jet  [" << i << "]\tpt: " << JetsVectNew1[i].pt() << "\teta: " << JetsVectNew1[i].eta() << "\tphi: " << JetsVectNew1[i].phi() << "\tmass: " << JetsVectNew1[i].mass() << std::endl;
@@ -755,6 +803,7 @@ Ntuplizer::beginJob()
   //Tree Branch
   tree=fs->make<TTree>("tree","tree");
   tree->Branch("isMC" , &isMC, "isMC/O");
+  tree->Branch("AtLeastOneTrigger" , &AtLeastOneTrigger , "AtLeastOneTrigger/O");
   tree->Branch("nJets",&nJets,"nJets/I");
   tree->Branch("nJetsNew0",&nJetsNew0,"nJetsNew0/I");
   tree->Branch("nJetsNew1",&nJetsNew1,"nJetsNew1/I");
@@ -787,6 +836,12 @@ Ntuplizer::beginJob()
   tree -> Branch("nPFCandidates" , &nPFCandidates, "nPFCandidates/I");
   tree -> Branch("nPFCandidatesTrack", &nPFCandidatesTrack, "nPFCandidatesTrack/I");
   tree -> Branch("nPFCandidatesHighPurityTrack", &nPFCandidatesHighPurityTrack, "nPFCandidatesHighPurityTrack/I");
+
+  // Set trigger branches
+  for(auto it = TriggerMap.begin(); it != TriggerMap.end(); it++)
+    {
+      tree->Branch(it->first.c_str(), &(it->second), (it->first+"/O").c_str());
+    }
   //tree -> Branch("PFCands", &PFCands);
 
   //tree -> Branch("nPFCandidatesFakeRejected" , &nPFCandidatesFakeRejected, "nPFCandidatesFakeRejected/I");

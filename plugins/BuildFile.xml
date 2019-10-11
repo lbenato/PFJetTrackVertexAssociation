@@ -7,4 +7,5 @@
 <use name="DataFormats/HepMCCandidate"/>
 <use name="SimDataFormats/PileupSummaryInfo"/>
 <use name="DataFormats/VertexReco"/>
+<use name="HLTrigger/HLTcore"/>
 <flags EDM_PLUGIN="1"/>

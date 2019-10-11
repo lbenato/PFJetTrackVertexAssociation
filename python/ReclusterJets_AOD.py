@@ -9,7 +9,7 @@ process = cms.Process("ReclusterAOD")
 task = cms.Task()
 
 ## Events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 ## Messagge logger
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -27,7 +27,9 @@ process.source = cms.Source("PoolSource",
         #AOD with general tracks:
         #'file:aodsim_generalTracks.root',
         #AOD with selected tracks:
-        'file:aodsim_generalTracks_eta_2p5.root',
+        #'file:aodsim_generalTracks_eta_2p5.root',
+        #Data
+        '/store/data/Run2017F/JetHT/AOD/17Nov2017-v1/70012/285B15C7-DBDF-E711-B0C0-484D7E8DF0C6.root',
     )
 )
 
@@ -44,6 +46,10 @@ GT = ''
 if isData:
     GT = '94X_dataRun2_v11'
     print "data 2017,AOD GT"
+    import FWCore.PythonUtilities.LumiList as LumiList
+    jsonName = "Cert_294927-306462_13TeV_PromptReco_Collisions17_JSON"
+    process.source.lumisToProcess = LumiList.LumiList(filename = 'data/JSON/'+jsonName+'.txt').getVLuminosityBlockRange()
+    print "JSON file loaded: ", jsonName
 elif not(isData):
     GT = '94X_mc2017_realistic_v17'#Moriond17 GT
 
@@ -466,6 +472,7 @@ task.add(process.ak4PFJetsFakeRejectedPuppi)
 #      Pat Jets       #
 #---------------------#
 
+
 #patJetPartons needed for pat jets
 process.patJetPartons = cms.EDProducer("HadronAndPartonSelector",
     fullChainPhysPartons = cms.bool(True),
@@ -473,7 +480,8 @@ process.patJetPartons = cms.EDProducer("HadronAndPartonSelector",
     partonMode = cms.string('Auto'),
     src = cms.InputTag("generator")
 )
-task.add(process.patJetPartons)
+if not isData:
+    task.add(process.patJetPartons)
 
 ## b-tag discriminators
 bTagDiscriminators = [
@@ -515,6 +523,16 @@ addJetCollection(
     rParam = 0.4
 )
 
+#LL
+if isData:
+    process.patJetsCHS.addGenJetMatch = False
+    process.patJetsCHS.addGenPartonMatch = False
+    process.patJetsCHS.embedGenJetMatch = False
+    process.patJetsCHS.embedGenPartonMatch = False
+    process.patJetsCHS.addPartonJetMatch = False
+    process.patJetsCHS.getJetMCFlavour = False
+
+
 #PF w/o CHS
 addJetCollection(
     process,
@@ -532,6 +550,15 @@ addJetCollection(
     rParam = 0.4
 )
 
+#LL
+if isData:
+    process.patJetsNew0.addGenJetMatch = False
+    process.patJetsNew0.addGenPartonMatch = False
+    process.patJetsNew0.embedGenJetMatch = False
+    process.patJetsNew0.embedGenPartonMatch = False
+    process.patJetsNew0.addPartonJetMatch = False
+    process.patJetsNew0.addJetFlavourInfo = False
+    process.patJetsNew0.getJetMCFlavour = False
 
 addJetCollection(
     process,
@@ -549,6 +576,16 @@ addJetCollection(
     rParam = 0.4
 )
 
+#LL
+if isData:
+    process.patJetsNew1.addGenJetMatch = False
+    process.patJetsNew1.addGenPartonMatch = False
+    process.patJetsNew1.embedGenJetMatch = False
+    process.patJetsNew1.embedGenPartonMatch = False
+    process.patJetsNew1.addPartonJetMatch = False
+    process.patJetsNew1.addJetFlavourInfo = False
+    process.patJetsNew1.getJetMCFlavour = False
+
 addJetCollection(
     process,
     labelName = 'New2',
@@ -565,6 +602,16 @@ addJetCollection(
     rParam = 0.4
 )
 
+#LL
+if isData:
+    process.patJetsNew2.addGenJetMatch = False
+    process.patJetsNew2.addGenPartonMatch = False
+    process.patJetsNew2.embedGenJetMatch = False
+    process.patJetsNew2.embedGenPartonMatch = False
+    process.patJetsNew2.addPartonJetMatch = False
+    process.patJetsNew2.addJetFlavourInfo = False
+    process.patJetsNew2.getJetMCFlavour = False
+
 addJetCollection(
     process,
     labelName = 'New3',
@@ -580,6 +627,16 @@ addJetCollection(
     algo = 'AK',
     rParam = 0.4
 )
+
+#LL
+if isData:
+    process.patJetsNew3.addGenJetMatch = False
+    process.patJetsNew3.addGenPartonMatch = False
+    process.patJetsNew3.embedGenJetMatch = False
+    process.patJetsNew3.embedGenPartonMatch = False
+    process.patJetsNew3.addPartonJetMatch = False
+    process.patJetsNew3.addJetFlavourInfo = False
+    process.patJetsNew3.getJetMCFlavour = False
 
 #Important! This collection behaves more like PF w/o chs!
 addJetCollection(
@@ -598,6 +655,17 @@ addJetCollection(
     rParam = 0.4
 )
 
+#LL
+if isData:
+    process.patJetsNew4.addGenJetMatch = False
+    process.patJetsNew4.addGenPartonMatch = False
+    process.patJetsNew4.embedGenJetMatch = False
+    process.patJetsNew4.embedGenPartonMatch = False
+    process.patJetsNew4.addPartonJetMatch = False
+    process.patJetsNew4.addJetFlavourInfo = False
+    process.patJetsNew4.getJetMCFlavour = False
+
+
 addJetCollection(
     process,
     labelName = 'New5',
@@ -614,6 +682,16 @@ addJetCollection(
     rParam = 0.4
 )
 
+#LL
+if isData:
+    process.patJetsNew5.addGenJetMatch = False
+    process.patJetsNew5.addGenPartonMatch = False
+    process.patJetsNew5.embedGenJetMatch = False
+    process.patJetsNew5.embedGenPartonMatch = False
+    process.patJetsNew5.addPartonJetMatch = False
+    process.patJetsNew5.addJetFlavourInfo = False
+    process.patJetsNew5.getJetMCFlavour = False
+
 addJetCollection(
     process,
     labelName = 'FakeRejectedCHS',
@@ -629,6 +707,16 @@ addJetCollection(
     rParam = 0.4
 )
 
+#LL
+if isData:
+    process.patJetsFakeRejectedCHS.addGenJetMatch = False
+    process.patJetsFakeRejectedCHS.addGenPartonMatch = False
+    process.patJetsFakeRejectedCHS.embedGenJetMatch = False
+    process.patJetsFakeRejectedCHS.embedGenPartonMatch = False
+    process.patJetsFakeRejectedCHS.addPartonJetMatch = False
+    process.patJetsFakeRejectedCHS.addJetFlavourInfo = False
+    process.patJetsFakeRejectedCHS.getJetMCFlavour = False
+
 addJetCollection(
     process,
     labelName = 'FakeRejectedPuppi',
@@ -643,6 +731,16 @@ addJetCollection(
     algo = 'AK',
     rParam = 0.4
 )
+
+#LL
+if isData:
+    process.patJetsFakeRejectedPuppi.addGenJetMatch = False
+    process.patJetsFakeRejectedPuppi.addGenPartonMatch = False
+    process.patJetsFakeRejectedPuppi.embedGenJetMatch = False
+    process.patJetsFakeRejectedPuppi.embedGenPartonMatch = False
+    process.patJetsFakeRejectedPuppi.addPartonJetMatch = False
+    process.patJetsFakeRejectedPuppi.addJetFlavourInfo = False
+    process.patJetsFakeRejectedPuppi.getJetMCFlavour = False
 
 #process.patJetCorrFactorsFakeRejected.primaryVertices = cms.InputTag('selectedPrimaryVerticesFakeRejected','','ReclusterAOD')
 
@@ -676,12 +774,13 @@ from PhysicsTools.PatAlgos.tools.pfTools import *
 #---------------------#
 # Slimmed PileUp Info #
 #---------------------#
-
+'''
 process.slimmedAddPileupInfo = cms.EDProducer("PileupSummaryInfoSlimmer",
     keepDetailedInfoFor = cms.vint32(0),
     src = cms.InputTag("addPileupInfo")
 )
 task.add(process.slimmedAddPileupInfo)
+'''
 
 #2. 'slimmedGenJets'
 ## FOR SOME REASON THIS DOES NOT WORK
@@ -747,7 +846,7 @@ process.TFileService = cms.Service( "TFileService",
 process.ntuple = cms.EDAnalyzer('Ntuplizer',
   jets = cms.InputTag('selectedPatJetsCHS'),
   jetpt = cms.double(15.),
-  pileup = cms.InputTag('slimmedAddPileupInfo'),
+  #pileup = cms.InputTag('slimmedAddPileupInfo'),
   #vertices = cms.InputTag('selectedPrimaryVerticesFakeRejected','','ReclusterAOD'),
   #vertices = cms.InputTag('selectedPrimaryVertices','','OWNPARTICLES'),
   vertices = cms.InputTag('offlinePrimaryVertices'),#!
@@ -762,6 +861,9 @@ process.ntuple = cms.EDAnalyzer('Ntuplizer',
   jets6 = cms.InputTag('selectedPatJetsFakeRejectedCHS'),
   jets7 = cms.InputTag('selectedPatJetsFakeRejectedPuppi'),
   genjets = cms.InputTag('ak4GenJets'),#slimmedGenJets do not work here, for unknown reasons
+  trigger = cms.InputTag('TriggerResults', '', 'HLT'),
+  paths = cms.vstring(*['HLT_DiPFJetAve40_v', 'HLT_DiPFJetAve60_v', 'HLT_DiPFJetAve80_v', 'HLT_DiPFJetAve140_v', 'HLT_DiPFJetAve200_v', 'HLT_DiPFJetAve260_v', 'HLT_DiPFJetAve320_v', 'HLT_DiPFJetAve400_v', 'HLT_DiPFJetAve500_v', 'HLT_DiPFJetAve15_HFJEC_v', 'HLT_DiPFJetAve25_HFJEC_v', 'HLT_DiPFJetAve35_HFJEC_v', 'HLT_PFJet40_v', 'HLT_PFJet60_v', 'HLT_PFJet80_v', 'HLT_PFJet140_v', 'HLT_PFJet200_v', 'HLT_PFJet260_v', 'HLT_PFJet320_v', 'HLT_PFJet400_v', 'HLT_PFJet450_v', 'HLT_PFJet500_v', 'HLT_PFJet550_v', 'HLT_PFHT180_v', 'HLT_PFHT250_v', 'HLT_PFHT370_v', 'HLT_PFHT430_v', 'HLT_PFHT510_v', 'HLT_PFHT590_v', 'HLT_PFHT680_v', 'HLT_PFHT780_v', 'HLT_PFHT890_v', 'HLT_PFHT1050_v']),
+  writeOnlyTriggerEvents = cms.bool(True if isData else False),
   rhosrc = cms.InputTag('fixedGridRhoFastjetAll'),
   verbose = cms.bool(False),
 )
@@ -775,10 +877,10 @@ process.seq = cms.Sequence(
     #process.offlinePrimaryVertices
 )
 
-
 process.lisa = cms.Path(
     process.seq
 )
+
 
 #####
 print(process.lisa)
